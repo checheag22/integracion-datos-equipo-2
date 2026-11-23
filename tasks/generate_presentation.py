@@ -1,307 +1,386 @@
 from pathlib import Path
+
+from PIL import Image, ImageDraw, ImageFont
 from pptx import Presentation
 from pptx.dml.color import RGBColor
-from pptx.enum.shapes import MSO_SHAPE, MSO_CONNECTOR
+from pptx.enum.shapes import MSO_CONNECTOR, MSO_SHAPE
 from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 from pptx.util import Inches, Pt
-from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
+ASSETS = ROOT / "assets"
 OUT = ROOT / "docs" / "presentacion-final-equipo-2.pptx"
 W, H = 13.333, 7.5
 
-IVORY = "F6F1E8"
-PAPER = "FFFCF7"
-GREEN = "183D34"
-GREEN2 = "2E594B"
-BURGUNDY = "6C303A"
-GOLD = "BE9856"
-INK = "26312C"
-MUTED = "6F726B"
-PALE_GREEN = "E7EEE8"
-PALE_GOLD = "F1E7D5"
-WHITE = "FFFFFF"
-
-prs = Presentation()
-prs.slide_width = Inches(W)
-prs.slide_height = Inches(H)
-blank = prs.slide_layouts[6]
+IVORY, PAPER = "F6F1E8", "FFFCF7"
+GREEN, GREEN2 = "183D34", "2E594B"
+BURGUNDY, GOLD = "6C303A", "BE9856"
+INK, MUTED = "26312C", "6F726B"
+PALE_GREEN, PALE_GOLD, WHITE = "E7EEE8", "F1E7D5", "FFFFFF"
 
 
-def color(hex_value):
-    return RGBColor.from_string(hex_value)
+def rgb(value):
+    return RGBColor.from_string(value)
 
 
-def rect(slide, x, y, w, h, fill, radius=False, line=None, transparency=0):
-    shape = slide.shapes.add_shape(
-        MSO_SHAPE.ROUNDED_RECTANGLE if radius else MSO_SHAPE.RECTANGLE,
-        Inches(x), Inches(y), Inches(w), Inches(h)
-    )
+def font(size, bold=False):
+    candidates = [
+        "/System/Library/Fonts/Supplemental/Arial.ttf",
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+    ]
+    for path in candidates:
+        if Path(path).exists():
+            return ImageFont.truetype(path, size)
+    return ImageFont.load_default()
+
+
+def make_medallion_asset():
+    """Produce the required editable-delivery diagram from verified project facts."""
+    width, height = 1800, 900
+    im = Image.new("RGB", (width, height), "#F6F1E8")
+    d = ImageDraw.Draw(im)
+    colors = ["#8A3642", "#B58B45", "#28564A"]
+    headings = ["BRONCE", "PLATA", "ORO"]
+    titles = ["Entrada conservada", "Reglas y relaciones", "Consulta para decidir"]
+    details = [
+        ["Ventas POS · CRM · ratings", "Muestra incluida en scripts SQL", "OPENJSON para ratings de ejemplo", "Texto crudo y trazable"],
+        ["TRIM · UPPER · TRY_CONVERT", "ROW_NUMBER por llave natural", "Dim_Clientes · Dim_Vinos", "Validación de rangos y llaves"],
+        ["Fact_Ventas_POS", "5 vistas de calidad y BI", "5 ventas · 24 botellas", "$22,760 MXN observados"],
+    ]
+    boxes = [(82, 135, 540, 700), (630, 135, 1090, 700), (1154, 135, 1718, 700)]
+    for idx, (x1, y1, x2, y2) in enumerate(boxes):
+        d.rounded_rectangle((x1, y1, x2, y2), radius=28, fill="#FFFCF7", outline="#E2D9CC", width=3)
+        d.rounded_rectangle((x1, y1, x2, y1 + 86), radius=28, fill=colors[idx])
+        d.rectangle((x1, y1 + 54, x2, y1 + 86), fill=colors[idx])
+        d.text((x1 + 30, y1 + 18), headings[idx], font=font(33, True), fill="#FFFFFF")
+        d.text((x1 + 28, y1 + 119), titles[idx], font=font(25, True), fill="#26312C")
+        for row, item in enumerate(details[idx]):
+            y = y1 + 190 + row * 73
+            d.ellipse((x1 + 32, y + 7, x1 + 48, y + 23), fill=colors[idx])
+            d.text((x1 + 62, y), item, font=font(19), fill="#3E423D")
+        d.rounded_rectangle((x1 + 28, y2 - 60, x2 - 28, y2 - 22), radius=16, fill="#F1E7D5")
+        d.text((x1 + 45, y2 - 56), ["Conservar", "Limpiar", "Responder"][idx], font=font(19, True), fill="#6C303A")
+    for x in (560, 1090):
+        d.line((x, 466, x + 48, 466), fill="#BE9856", width=8)
+        d.polygon([(x + 48, 449), (x + 78, 466), (x + 48, 483)], fill="#BE9856")
+    d.text((82, 780), "Alcance: muestra de SQL; sin archivos originales, inventario ni órdenes web.", font=font(22, True), fill="#26312C")
+    im.save(ASSETS / "flujo_medallon_sql.png", optimize=True)
+
+
+def add_rect(slide, x, y, w, h, fill, radius=True, line=None, transparency=0):
+    shape = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE if radius else MSO_SHAPE.RECTANGLE,
+                                   Inches(x), Inches(y), Inches(w), Inches(h))
     shape.fill.solid()
-    shape.fill.fore_color.rgb = color(fill)
+    shape.fill.fore_color.rgb = rgb(fill)
     if transparency:
         shape.fill.transparency = transparency
     if line:
-        shape.line.color.rgb = color(line)
+        shape.line.color.rgb = rgb(line)
         shape.line.width = Pt(0.8)
     else:
         shape.line.fill.background()
     if radius:
         try:
-            shape.adjustments[0] = 0.12
+            shape.adjustments[0] = 0.11
         except Exception:
             pass
     return shape
 
 
-def text(slide, x, y, w, h, value, size=16, fill=INK, bold=False,
-         font="Avenir Next", align=PP_ALIGN.LEFT, valign=MSO_ANCHOR.TOP,
-         margin=0.02, italic=False, spacing=1.0):
+def add_text(slide, x, y, w, h, value, size=16, fill=INK, bold=False,
+             face="Avenir Next", align=PP_ALIGN.LEFT, valign=MSO_ANCHOR.TOP,
+             margin=0.03, italic=False):
     box = slide.shapes.add_textbox(Inches(x), Inches(y), Inches(w), Inches(h))
     tf = box.text_frame
     tf.clear()
     tf.word_wrap = True
-    tf.margin_left = Inches(margin)
-    tf.margin_right = Inches(margin)
-    tf.margin_top = Inches(margin)
-    tf.margin_bottom = Inches(margin)
+    tf.margin_left = tf.margin_right = Inches(margin)
+    tf.margin_top = tf.margin_bottom = Inches(margin)
     tf.vertical_anchor = valign
     p = tf.paragraphs[0]
     p.alignment = align
-    p.line_spacing = spacing
     run = p.add_run()
     run.text = value
-    run.font.name = font
+    run.font.name = face
     run.font.size = Pt(size)
     run.font.bold = bold
     run.font.italic = italic
-    run.font.color.rgb = color(fill)
+    run.font.color.rgb = rgb(fill)
     return box
 
 
-def photo(slide, filename, x, y, w, h, focus=(0.5, 0.5)):
-    path = ROOT / "assets" / filename
+def add_photo(slide, filename, x, y, w, h, focus=(0.5, 0.5)):
+    path = ASSETS / filename
     pic = slide.shapes.add_picture(str(path), Inches(x), Inches(y), width=Inches(w), height=Inches(h))
     with Image.open(path) as im:
         sw, sh = im.size
-    source_ar = sw / sh
-    target_ar = w / h
+    source_ar, target_ar = sw / sh, w / h
     fx, fy = focus
     if source_ar > target_ar:
         crop = 1 - target_ar / source_ar
-        pic.crop_left = crop * fx
-        pic.crop_right = crop * (1 - fx)
+        pic.crop_left, pic.crop_right = crop * fx, crop * (1 - fx)
     elif source_ar < target_ar:
         crop = 1 - source_ar / target_ar
-        pic.crop_top = crop * fy
-        pic.crop_bottom = crop * (1 - fy)
+        pic.crop_top, pic.crop_bottom = crop * fy, crop * (1 - fy)
     return pic
 
 
-def title(slide, eyebrow, heading, sub=None, dark=False):
-    fg = WHITE if dark else INK
-    accent = "D7B879" if dark else GOLD
-    text(slide, 0.62, 0.34, 11.8, 0.26, eyebrow.upper(), 10, accent, True)
-    text(slide, 0.62, 0.72, 12.0, 0.58, heading, 26, fg, True, font="Georgia")
-    if sub:
-        text(slide, 0.64, 1.35, 11.8, 0.38, sub, 13, "E3DDD1" if dark else MUTED)
-
-
-def footer(slide, number, dark=False, label="INTEGRACIÓN DE DATOS · EQUIPO 2"):
-    fg = "D6D1C7" if dark else MUTED
-    text(slide, 0.62, 7.18, 9.5, 0.18, label, 8, fg, True)
-    text(slide, 12.05, 7.13, 0.65, 0.22, f"{number:02d} / 08", 9, fg, True, align=PP_ALIGN.RIGHT)
-
-
-def new_slide(bg=IVORY):
-    slide = prs.slides.add_slide(blank)
+def new_slide(prs, bg=IVORY):
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
     slide.background.fill.solid()
-    slide.background.fill.fore_color.rgb = color(bg)
+    slide.background.fill.fore_color.rgb = rgb(bg)
     return slide
 
 
-def pill(slide, x, y, w, label, fill=PALE_GREEN, fg=GREEN):
-    rect(slide, x, y, w, 0.33, fill, radius=True)
-    text(slide, x + 0.1, y + 0.04, w - 0.2, 0.22, label, 9, fg, True, align=PP_ALIGN.CENTER)
+def heading(slide, eyebrow, title, subtitle=None, dark=False):
+    fg = WHITE if dark else INK
+    accent = "D7B879" if dark else BURGUNDY
+    add_text(slide, 0.62, 0.35, 12, 0.25, eyebrow.upper(), 10, accent, True)
+    add_text(slide, 0.62, 0.72, 12, 0.58, title, 27, fg, True, face="Georgia")
+    if subtitle:
+        add_text(slide, 0.64, 1.36, 11.9, 0.38, subtitle, 13, "E4DED2" if dark else MUTED)
 
 
-# 1 — Portada y responsables
-s = new_slide(GREEN)
-photo(s, "portada-vinicola-golden-hour.png", 0, 0, 5.5, H, focus=(0.43, 0.5))
-rect(s, 5.5, 0, W - 5.5, H, GREEN)
-text(s, 6.12, 0.58, 6.45, 0.3, "PROYECTO FINAL · INTEGRACIÓN DE DATOS", 10, "D7B879", True)
-logo = s.shapes.add_picture(str(ROOT / "assets" / "logo_conceptual-alba.png"), Inches(11.93), Inches(0.46), width=Inches(0.55), height=Inches(0.55))
-text(s, 6.1, 1.18, 6.55, 1.28, "De datos dispersos\na una respuesta clara", 30, WHITE, True, font="Georgia", spacing=0.95)
-text(s, 6.14, 2.58, 6.25, 0.62, "Ventas, clientes y calificaciones integrados en SQL Server.", 17, "F2EDE4")
-pill(s, 6.14, 3.35, 2.75, "Viñedos del Alba · caso ficticio", fill="2B5548", fg=WHITE)
-text(s, 6.14, 3.92, 6.0, 0.22, "EQUIPO 2 · RESPONSABILIDADES", 9, "D7B879", True)
+def footer(slide, n, total):
+    add_text(slide, 0.62, 7.16, 10, 0.18, "INTEGRACIÓN DE DATOS · EQUIPO 2", 8, MUTED, True)
+    add_text(slide, 11.9, 7.13, 0.78, 0.22, f"{n:02d} / {total:02d}", 9, MUTED, True, align=PP_ALIGN.RIGHT)
+
+
+def note(slide, minutes, script, cue):
+    slide.notes_slide.notes_text_frame.text = (
+        f"TIEMPO: {minutes} min\n\nQUÉ DECIR\n{script}\n\nIDEA PARA RECORDAR\n{cue}"
+    )
+
+
+make_medallion_asset()
+prs = Presentation()
+prs.slide_width, prs.slide_height = Inches(W), Inches(H)
+blank = prs.slide_layouts[6]
+total = 13
+
+# 1 · Una portada fácil de abrir y explicar.
+s = new_slide(prs, GREEN)
+add_photo(s, "portada-vinicola-golden-hour.png", 0, 0, 5.15, H, focus=(0.43, 0.5))
+add_rect(s, 5.15, 0, W - 5.15, H, GREEN, radius=False)
+add_photo(s, "logo_negocio.png", 11.95, 0.45, 0.7, 0.82)
+add_text(s, 5.8, 0.62, 5.6, 0.25, "PROYECTO INTEGRADOR · SQL SERVER", 10, "D7B879", True)
+add_text(s, 5.8, 1.24, 6.5, 1.35, "De datos dispersos\na una respuesta clara", 31, WHITE, True, face="Georgia")
+add_text(s, 5.85, 2.86, 6.35, 0.62, "Integramos ventas, clientes y calificaciones para entender qué se vende y a quién.", 17, "F2EDE4")
+add_rect(s, 5.85, 3.7, 3.42, 0.42, "2B5548")
+add_text(s, 5.95, 3.78, 3.22, 0.22, "VIÑEDOS DEL ALBA · CASO FICTICIO", 9, WHITE, True, align=PP_ALIGN.CENTER)
+add_text(s, 5.86, 4.42, 6.15, 0.55, "Ezequiel · José · Patricio · Ximena · Joel\nEquipo 2 · Universidad Iberoamericana León", 13, WHITE, True)
+add_text(s, 5.86, 5.34, 6.22, 0.47, "15 min exposición y demo  +  8 min preguntas\n2 min de transiciones  =  25 min totales", 12, "E5DED2", True)
+add_text(s, 0.62, 7.16, 4.0, 0.18, "INTEGRACIÓN DE DATOS · EQUIPO 2", 8, WHITE, True)
+add_text(s, 11.9, 7.13, 0.78, 0.22, "01 / 13", 9, WHITE, True, align=PP_ALIGN.RIGHT)
+note(s, 0.5, "Somos el Equipo 2. En quince minutos explicaremos el alcance, cómo fluyen los datos, qué controles usamos y qué resultado de negocio podemos defender. Después dejamos ocho minutos para las dos preguntas de cada integrante. El nombre Viñedos del Alba es ficticio y solo identifica el caso.", "Tres fuentes, tres capas, un caso académico.")
+
+# 2 · Matriz de roles exigida por la guía.
+s = new_slide(prs)
+heading(s, "EQUIPO 2 · RESPONSABILIDADES", "Cada integrante tiene una parte clara", "Los cinco nombres y roles siguen el banco oficial de evaluación.")
 roles = [
-    ("Ezequiel Aguilera", "Liderazgo de proyecto"),
-    ("José Hernández", "Arquitectura de datos"),
-    ("Patricio García", "Ingeniería ETL"),
-    ("Ximena Ibarra", "Calidad y QA"),
-    ("Joel Ibarra", "BI + Documentación y Trello"),
+    ("Ezequiel Aguilera", "Líder de proyecto + BI", "Coordina y explica la decisión."),
+    ("José Hernández", "Arquitecto de datos / SQL", "Explica capas, llaves y modelo."),
+    ("Patricio García", "Ingeniero ETL / Pipeline", "Muestra ingesta y transformación."),
+    ("Ximena Ibarra", "Calidad de datos / QA", "Defiende conteos y controles."),
+    ("Joel Ibarra", "Documentación y Trello", "Ubica entregables y seguimiento."),
 ]
-for i, (name, role) in enumerate(roles):
-    y = 4.25 + i * 0.4
-    text(s, 6.15, y, 2.8, 0.27, name, 12, WHITE, True)
-    text(s, 9.0, y, 3.45, 0.27, role, 11, "E5DED2")
-text(s, 6.14, 6.55, 6.2, 0.32, "Exposición + demo: 12–15 min   ·   Preguntas: 6–8 min", 10, "E3DDD1")
-footer(s, 1, dark=True)
-
-# 2 — Fuentes y alcance
-s = new_slide()
-title(s, "01 · Fuentes y arquitectura", "Tres fuentes, una misma historia", "Caso académico de vinícola; la muestra disponible se carga desde scripts SQL.")
-cards = [
-    ("fuente-punto-venta.png", "VENTAS POS", "5 transacciones", "Qué se vendió y cuánto." , (0.55,0.5)),
-    ("clientes-vinicola.png", "CLIENTES CRM", "4 clientes", "Quién compra y su membresía.", (0.72,0.5)),
-    ("flujo-medallon-fotografico.png", "RATINGS", "3 vinos", "Cómo se califica cada etiqueta.", (0.5,0.5)),
-]
-for i, (img, label, stat, desc, focus) in enumerate(cards):
-    x = 0.62 + i * 4.08
-    rect(s, x, 2.0, 3.83, 3.62, PAPER, radius=True, line="E7DFD2")
-    photo(s, img, x + 0.12, 2.12, 3.59, 1.82, focus=focus)
-    text(s, x + 0.22, 4.12, 3.35, 0.25, label, 10, BURGUNDY, True)
-    text(s, x + 0.22, 4.49, 3.35, 0.44, stat, 20, GREEN, True, font="Georgia")
-    text(s, x + 0.22, 5.01, 3.36, 0.42, desc, 12, MUTED)
-rect(s, 0.62, 5.92, 12.08, 0.72, PALE_GOLD, radius=True)
-text(s, 0.83, 6.08, 11.65, 0.38, "Alcance real: POS + CRM + ratings. No recibimos archivos fuente originales ni datos de inventario o ventas web.", 12, INK, True, valign=MSO_ANCHOR.MIDDLE)
-footer(s, 2)
-
-# 3 — Modelo y relaciones
-s = new_slide()
-title(s, "02 · Modelo relacional", "Una venta conecta cliente y vino", "Las llaves mantienen la relación y evitan ventas huérfanas en Oro.")
-# bronze source cards
-source_cards = [(0.72, "Bronce · POS", "texto crudo"), (4.95, "Bronce · CRM", "texto crudo"), (9.17, "Bronce · ratings", "texto crudo")]
-for x, heading, caption in source_cards:
-    rect(s, x, 1.98, 3.42, 0.69, PAPER, radius=True, line="E1D8CA")
-    text(s, x + 0.16, 2.09, 3.1, 0.25, heading, 12, BURGUNDY, True)
-    text(s, x + 0.16, 2.37, 3.1, 0.18, caption, 9, MUTED)
-# La fuente de ventas llega al hecho; CRM y ratings nutren sus dimensiones.
-for x1, y1, x2, y2 in [(6.66,2.67,3.25,3.35),(10.88,2.67,10.05,3.35)]:
-    ln = s.shapes.add_connector(MSO_CONNECTOR.STRAIGHT, Inches(x1), Inches(y1), Inches(x2), Inches(y2))
-    ln.line.color.rgb = color(GOLD)
-    ln.line.width = Pt(1.4)
-# dimension cards
-rect(s, 1.15, 3.35, 4.25, 1.55, PALE_GREEN, radius=True)
-text(s, 1.42, 3.56, 3.75, 0.28, "plata.Dim_Clientes", 15, GREEN, True, font="Georgia")
-text(s, 1.42, 4.0, 3.72, 0.68, "PK  ID_Cliente  VARCHAR(30)\nNombre · membresía · ciudad · gasto", 11, INK)
-rect(s, 7.93, 3.35, 4.25, 1.55, PALE_GOLD, radius=True)
-text(s, 8.2, 3.56, 3.75, 0.28, "plata.Dim_Vinos", 15, BURGUNDY, True, font="Georgia")
-text(s, 8.2, 4.0, 3.72, 0.68, "PK  SKU_Vino  VARCHAR(30)\nEtiqueta · puntaje · cepa y origen", 11, INK)
-# central fact
-rect(s, 3.7, 5.49, 5.95, 1.06, GREEN, radius=True)
-text(s, 4.0, 5.65, 5.45, 0.26, "oro.Fact_Ventas_POS", 16, WHITE, True, font="Georgia", align=PP_ALIGN.CENTER)
-text(s, 4.0, 6.03, 5.45, 0.25, "PK ID_Venta_POS · FK cliente y vino · fecha DATETIME2 · precio DECIMAL", 10, "EDE8DE", align=PP_ALIGN.CENTER)
-# relationship connectors
-for x1, y1, x2, y2 in [(3.25,4.9,5.0,5.49),(10.05,4.9,8.35,5.49)]:
-    ln = s.shapes.add_connector(MSO_CONNECTOR.STRAIGHT, Inches(x1), Inches(y1), Inches(x2), Inches(y2))
-    ln.line.color.rgb = color(GOLD)
-    ln.line.width = Pt(2)
-text(s, 0.77, 6.72, 11.85, 0.23, "Customer 360 (Tickets, Interacciones y Ventas) no forma parte del esquema implementado.", 10, MUTED, italic=True)
-footer(s, 3)
-
-# 4 — Demo guiada
-s = new_slide(GREEN)
-photo(s, "insight-de-negocio.png", 7.15, 0, W - 7.15, H, focus=(0.72,0.5))
-rect(s, 0, 0, 7.2, H, GREEN)
-title(s, "03 · Corrida en vivo · 2–3 min", "Tres acciones; un resultado", "Patricio · mostrar qué cambia, no leer el código.", dark=True)
-steps = [
-    ("01", "Cargar las capas", "Ejecutar los scripts 01 → 04 en orden."),
-    ("02", "Revisar la calidad", "Abrir oro.vw_Calidad_Integracion."),
-    ("03", "Responder una pregunta", "Consultar ventas y el historial de CLI-V01."),
-]
-for i, (num, head, desc) in enumerate(steps):
-    y = 2.03 + i * 1.12
-    rect(s, 0.66, y, 0.56, 0.56, GOLD, radius=True)
-    text(s, 0.66, y + 0.09, 0.56, 0.32, num, 14, GREEN, True, align=PP_ALIGN.CENTER)
-    text(s, 1.48, y - 0.01, 5.25, 0.31, head, 16, WHITE, True)
-    text(s, 1.49, y + 0.38, 5.25, 0.42, desc, 12, "E4DED2")
-rect(s, 0.66, 5.56, 5.96, 0.86, "294D43", radius=True)
-text(s, 0.87, 5.7, 5.55, 0.52, "Pregunta que contesta la demo: ¿qué compró este cliente y qué calidad tiene ese vino?", 12, WHITE, True, valign=MSO_ANCHOR.MIDDLE)
-rect(s, 7.65, 6.25, 5.1, 0.58, GREEN, radius=True)
-text(s, 7.85, 6.37, 4.7, 0.31, "Ejemplo: CLI-V01 · 1–3 ago 2026", 12, WHITE, True, align=PP_ALIGN.CENTER)
-footer(s, 4, dark=True)
-
-# 5 — Transformación legible
-s = new_slide()
-title(s, "04 · Limpieza e idempotencia", "Limpiar sin perder el origen", "Cada regla resuelve un problema concreto y conserva la trazabilidad.")
-photo(s, "flujo-medallon-fotografico.png", 0.62, 1.9, 5.12, 4.75, focus=(0.49,0.5))
-rect(s, 0.62, 5.86, 5.12, 0.79, GREEN, radius=True, transparency=8)
-text(s, 0.86, 6.02, 4.65, 0.41, "Bronce conserva → Plata limpia → Oro responde", 13, WHITE, True, align=PP_ALIGN.CENTER, valign=MSO_ANCHOR.MIDDLE)
-etl = [
-    ("1", "Conservar", "Bronce guarda el valor original como texto."),
-    ("2", "Estandarizar", "TRIM y UPPER normalizan; TRY_CONVERT y COALESCE aplican reglas."),
-    ("3", "Elegir una versión", "ROW_NUMBER prioriza fecha y desempata por ingesta."),
-    ("4", "Integrar", "LEFT JOIN conserva venta anónima; FK valida relaciones."),
-]
-for i, (n, head, desc) in enumerate(etl):
-    y = 1.95 + i * 0.97
-    rect(s, 6.12, y, 0.48, 0.48, PALE_GOLD, radius=True)
-    text(s, 6.12, y + 0.08, 0.48, 0.28, n, 13, BURGUNDY, True, align=PP_ALIGN.CENTER)
-    text(s, 6.82, y - 0.01, 5.82, 0.3, head, 15, INK, True)
-    text(s, 6.82, y + 0.35, 5.82, 0.43, desc, 11, MUTED)
-rect(s, 6.12, 5.98, 6.28, 0.68, PALE_GREEN, radius=True)
-text(s, 6.33, 6.06, 5.88, 0.53, "‘ Gold ’ → ‘GOLD’ · $4,920 marcado como proxy.\nReejecutar conserva una venta por llave en Oro.", 10, GREEN, True, valign=MSO_ANCHOR.MIDDLE)
-footer(s, 5)
-
-# 6 — Calidad y límites
-s = new_slide()
-title(s, "05 · Calidad", "¿Qué tan confiable es esta muestra?", "Respondemos con conteos observados, no con suposiciones.")
-metrics = [
-    ("5 / 5", "ventas integradas", "Todas las ventas POS válidas."),
-    ("0", "ventas rechazadas", "Sin conversiones inválidas en la muestra."),
-    ("1", "venta anónima", "Se conserva como CLI-MOSTRADOR."),
-    ("$4,920", "proxy identificado", "Imputación CRM, no gasto anual confirmado."),
-]
-for i, (value, label, note) in enumerate(metrics):
+for i, (name, role, task) in enumerate(roles):
     col, row = i % 2, i // 2
-    x, y = 0.65 + col * 4.1, 2.05 + row * 1.78
-    rect(s, x, y, 3.82, 1.5, PAPER, radius=True, line="E8DFD3")
-    text(s, x + 0.2, y + 0.15, 3.4, 0.53, value, 25, GREEN if i != 3 else BURGUNDY, True, font="Georgia")
-    text(s, x + 0.22, y + 0.73, 3.35, 0.25, label, 12, INK, True)
-    text(s, x + 0.22, y + 1.03, 3.36, 0.35, note, 10, MUTED)
-photo(s, "clientes-vinicola.png", 8.95, 2.05, 3.72, 3.25, focus=(0.75,0.5))
-text(s, 0.72, 5.63, 7.92, 0.64, "CRM: 4/4 · ratings: 3/3 · 0 duplicados en la muestra · 0 clientes/vinos huérfanos. CHECK: puntaje, botellas y precio.", 10, MUTED, True, valign=MSO_ANCHOR.MIDDLE)
-rect(s, 8.95, 5.46, 3.72, 1.02, PALE_GOLD, radius=True)
-text(s, 9.15, 5.59, 3.32, 0.69, "Límite: solo cinco ventas. Sin inventario ni datos web no podemos recomendar reabasto ni medir venta en línea.", 11, INK, True, valign=MSO_ANCHOR.MIDDLE)
-footer(s, 6)
+    x, y = 0.68 + col * 6.18, 1.92 + row * 1.35
+    if i == 4:
+        x, y = 3.77, 4.62
+    add_rect(s, x, y, 5.86, 1.05, PAPER, line="E7DFD2")
+    add_text(s, x + 0.2, y + 0.12, 5.45, 0.28, name, 13, GREEN, True)
+    add_text(s, x + 0.2, y + 0.43, 2.75, 0.25, role, 10, BURGUNDY, True)
+    add_text(s, x + 3.04, y + 0.43, 2.62, 0.39, task, 9, MUTED)
+add_rect(s, 0.68, 6.18, 11.96, 0.53, PALE_GOLD)
+add_text(s, 0.93, 6.29, 11.45, 0.28, "En la defensa, Joel lee los KPI y Ezequiel explica la decisión: ambos bloques quedan cubiertos.", 11, INK, True, valign=MSO_ANCHOR.MIDDLE)
+footer(s, 2, total)
+note(s, 0.75, "Presentamos responsabilidades para que sepan quién explica cada parte. La asignación de nombres y roles conserva el banco oficial. Como somos cinco, Joel apoya la lectura de los KPI en la exposición y Ezequiel interpreta la decisión comercial; el rol oficial de Ezequiel sigue siendo Líder + BI.", "Cada pregunta técnica la responde primero quien trabajó ese bloque.")
 
-# 7 — Insight de negocio
-s = new_slide()
-photo(s, "insight-de-negocio.png", 0, 0, 5.55, H, focus=(0.68,0.5))
-rect(s, 5.55, 0, W - 5.55, H, IVORY)
-text(s, 6.12, 0.48, 6.45, 0.24, "06 · ORO Y DECISIÓN DE NEGOCIO", 10, BURGUNDY, True)
-text(s, 6.1, 0.88, 6.4, 0.65, "Una señal para probar", 27, INK, True, font="Georgia")
-text(s, 6.12, 1.65, 6.0, 0.31, "Así se ven los resultados de la muestra", 13, MUTED)
-for i,(num,label) in enumerate([("$22,760","5 ventas · 24 botellas"),("63.3%","Rioja: $14,400"),("12 / 15","Platinum >93 (80%) · 1 cliente")]):
-    y=2.18+i*0.87
-    text(s,6.15,y,2.45,0.48,num,23,GREEN if i!=1 else BURGUNDY,True,font="Georgia")
-    text(s,8.77,y+0.08,3.75,0.37,label,12,INK,True)
-rect(s,6.1,4.78,6.3,1.38,PALE_GOLD,radius=True)
-text(s,6.35,4.91,5.82,1.12,"Rioja: $14,400 (63.27%). Los $14,400 de vinos >93 son 12 botellas de Tempranillo Rioja (93.8) compradas por una persona. Es una hipótesis para probar, no causalidad demostrada.",11,INK,True,valign=MSO_ANCHOR.MIDDLE)
-text(s,6.12,6.43,6.1,0.33,"Joel · lectura de Oro · Ezequiel · decisión comercial",10,MUTED,italic=True)
-footer(s, 7)
+# 3 · Problema / objetivo y muestra disponible.
+s = new_slide(prs)
+heading(s, "01 · Contexto", "La pregunta: ¿qué compran nuestros clientes?", "Para contestarla, juntamos la venta con el perfil del cliente y la calidad del vino.")
+cards = [
+    ("fuente-punto-venta.png", "PUNTO DE VENTA", "5 ventas", "24 botellas · $22,760 MXN", (0.5, 0.5)),
+    ("clientes-vinicola.png", "CRM", "4 clientes", "Membresía · ciudad · gasto", (0.72, 0.5)),
+    ("uvas-dorado.png", "RATINGS", "3 vinos", "Puntaje · etiqueta · origen", (0.5, 0.5)),
+]
+for i, (img, label, metric, detail, focus) in enumerate(cards):
+    x = 0.62 + i * 4.08
+    add_rect(s, x, 2.02, 3.82, 3.45, PAPER, line="E7DFD2")
+    add_photo(s, img, x + 0.1, 2.1, 3.62, 1.62, focus)
+    add_text(s, x + 0.2, 3.91, 3.38, 0.24, label, 9, BURGUNDY, True)
+    add_text(s, x + 0.2, 4.26, 3.4, 0.5, metric, 23, GREEN, True, face="Georgia")
+    add_text(s, x + 0.2, 4.88, 3.38, 0.29, detail, 11, MUTED)
+add_rect(s, 0.62, 5.79, 12.06, 0.79, PALE_GOLD)
+add_text(s, 0.86, 5.98, 11.5, 0.42, "Alcance honesto: la muestra viene dentro de scripts SQL; no recibimos archivos POS/CRM/rating, inventario ni ventas web.", 12, INK, True, valign=MSO_ANCHOR.MIDDLE)
+footer(s, 3, total)
+note(s, 1.0, "La pregunta analítica es sencilla: al conectar ventas, clientes y ratings podemos saber qué vino se vendió, por qué canal y a qué segmento. La muestra tiene cinco transacciones, cuatro clientes y tres vinos. No recibimos archivos originales ni datos de inventario o de venta web; por eso nuestro resultado describe únicamente esta muestra.", "Lo que presentamos es verificable, pero pequeño y basado en datos de ejemplo cargados desde SQL.")
 
-# 8 — Repositorio y cierre
-s = new_slide(GREEN)
-photo(s, "portada-vinicola-golden-hour.png", 7.35, 0, W - 7.35, H, focus=(0.67,0.52))
-rect(s, 0, 0, 7.38, H, GREEN)
-title(s, "07 · GitHub y Trello", "El proyecto queda listo para continuar", "Joel · enseñar el repositorio y el tablero, sin leer cada archivo.", dark=True)
-rect(s,0.65,2.0,6.05,1.15,"294D43",radius=True)
-text(s,0.9,2.16,5.6,0.29,"GITHUB · RAMA DE ENTREGA",10,"D7B879",True)
-text(s,0.9,2.54,5.58,0.34,"SQL modular · documentación · presentación",13,WHITE,True)
-rect(s,0.65,3.42,6.05,1.15,"294D43",radius=True)
-text(s,0.9,3.58,5.6,0.29,"TRELLO · TABLERO PRIVADO",10,"D7B879",True)
-text(s,0.9,3.96,5.58,0.34,"Avance completado + tareas de defensa",13,WHITE,True)
-text(s,0.72,4.95,5.8,0.26,"SIGUE ANTES DE ENTREGAR",10,"D7B879",True)
-for i, item in enumerate(["Ensayar la demo y preparar capturas reales de SSMS", "Definir Customer 360 y documentar sus campos", "Subir el PDF a Moodle cuando corresponda"]):
-    y = 5.33 + i * 0.41
-    text(s, 0.76, y, 0.25, 0.25, "•", 16, GOLD, True)
-    text(s, 1.06, y, 5.35, 0.28, item, 11, WHITE)
-rect(s,7.68,5.57,5.15,1.2,GREEN,radius=True)
-text(s,7.92,5.75,4.68,0.82,"Cierre: integrar los datos nos deja hacer una mejor pregunta; la siguiente mejora empieza por conseguir fuentes y más muestra.",13,WHITE,True,font="Georgia",align=PP_ALIGN.CENTER,valign=MSO_ANCHOR.MIDDLE)
-footer(s, 8, dark=True)
+# 4 · Arquitectura Medallion con el asset requerido y corregido.
+s = new_slide(prs)
+heading(s, "02 · Arquitectura", "Bronce conserva · Plata limpia · Oro responde", "El flujo real implementado en SQL Server; el archivo fuente está en assets/.")
+add_photo(s, "flujo_medallon_sql.png", 1.5, 1.72, 10.35, 5.18)
+footer(s, 4, total)
+note(s, 1.25, "Bronce guarda la entrada como texto y nos deja diagnosticarla. Plata aplica limpieza y conversiones, forma las dimensiones de clientes y vinos y prepara las ventas. Oro contiene el hecho de ventas y cinco vistas para operación, calidad y análisis. El diagrama aclara que usamos datos de muestra incluidos en SQL, no CSV o Excel que nunca recibimos.", "Oro es la capa de consumo; la tabla de ventas no se queda en Plata.")
+
+# 5 · DER oficial, legible y con las llaves destacadas.
+s = new_slide(prs)
+heading(s, "03 · Modelo relacional", "Una venta se conecta con un cliente y un vino", "Las llaves primarias identifican; las foráneas protegen las relaciones en Oro.")
+add_photo(s, "diagrama_der_sqlserver.png", 1.22, 1.9, 10.89, 5.1)
+footer(s, 5, total)
+note(s, 1.25, "El hecho Fact_Ventas_POS tiene como llave primaria el ID de venta. Sus llaves foráneas apuntan a las dimensiones de cliente y vino. Usamos VARCHAR para IDs, DATETIME2 para la fecha, DECIMAL para importes y puntajes e INT para botellas. La venta anónima se liga a CLI-MOSTRADOR para conservar el ingreso sin inventar una identidad.", "Las líneas entre el hecho Oro y las dimensiones Plata son FKs físicas; la zona de Bronce se transforma por ETL.")
+
+# 6 · Demo desde SSMS, tres acciones claras y Plan B.
+s = new_slide(prs, GREEN)
+add_photo(s, "fuente-punto-venta.png", 7.65, 0, W - 7.65, H, focus=(0.5, 0.5))
+add_rect(s, 0, 0, 7.72, H, GREEN, radius=False)
+heading(s, "04 · Corrida en vivo · 2–3 min", "Tres pasos; una pregunta", "Patricio comparte SQL Server Management Studio.", dark=True)
+steps = [
+    ("01", "Ingesta", "Ejecutar 02 y contar POS en Bronce."),
+    ("02", "Transformación + regla", "Ejecutar 03; revisar 5 ventas y la venta anónima."),
+    ("03", "Oro + negocio", "Ejecutar 04; abrir Vista Gold y leer Rioja."),
+]
+for i, (num, title, desc) in enumerate(steps):
+    y = 2.0 + i * 1.08
+    add_rect(s, 0.68, y, 0.52, 0.52, GOLD)
+    add_text(s, 0.68, y + 0.09, 0.52, 0.29, num, 13, GREEN, True, align=PP_ALIGN.CENTER)
+    add_text(s, 1.43, y - 0.02, 5.8, 0.3, title, 15, WHITE, True)
+    add_text(s, 1.45, y + 0.35, 5.8, 0.43, desc, 11, "E4DED2")
+add_rect(s, 0.68, 5.44, 6.2, 0.98, "294D43")
+add_text(s, 0.92, 5.61, 5.72, 0.61, "Plan B local: salida real del 23-nov-2026 en docs/evidencia-ejecucion-sqlserver-2026-11-23.txt y resumen en docs/plan-b-resultados.md.", 10, WHITE, True)
+footer(s, 6, total)
+note(s, 2.5, "La base y las tablas se dejan preparadas antes de iniciar. En vivo reejecutamos la ingesta para ver que no duplica, corremos el procedimiento de Plata y abrimos la validación de calidad y la Vista Gold. Cerramos preguntando: qué compró CLI-V01 y qué puntaje tenía el vino. Si falla la conexión, usamos el resultado real local, decimos que es respaldo y no lo llamamos captura SSMS.", "No leer código: mostrar el antes, la regla y el resultado.")
+
+
+# 7 · Antes y después sencillo.
+s = new_slide(prs, GREEN)
+add_photo(s, "bodega-barricas.png", 7.5, 0, W - 7.5, H, focus=(0.67, 0.5))
+add_rect(s, 0, 0, 7.55, H, GREEN, radius=False)
+heading(s, "05 · Limpieza", "El dato cambia con una regla visible", "Un ejemplo por transformación. No hace falta leer todo el procedimiento.", dark=True)
+examples = [
+    ("' Gold '", "TRIM + UPPER", "GOLD", "Categoría normalizada"),
+    ("fecha como texto", "TRY_CONVERT", "DATETIME2", "Solo integra si convierte"),
+    ("gasto CRM vacío", "COALESCE + marca", "$4,920*", "Proxy observado en POS"),
+]
+for i, (before, rule, after, why) in enumerate(examples):
+    y = 2.0 + i * 1.14
+    add_rect(s, 0.65, y, 6.15, 0.9, "294D43")
+    add_text(s, 0.84, y + 0.15, 1.58, 0.26, before, 12, WHITE, True)
+    add_text(s, 2.3, y + 0.16, 1.45, 0.25, rule, 10, "D7B879", True, align=PP_ALIGN.CENTER)
+    add_text(s, 3.87, y + 0.12, 1.35, 0.3, after, 15, WHITE, True, face="Georgia", align=PP_ALIGN.CENTER)
+    add_text(s, 5.14, y + 0.15, 1.45, 0.43, why, 9, "E2DDD4")
+add_text(s, 0.84, 5.75, 5.95, 0.66, "* Imputación marcada; no equivale a gasto anual confirmado. La venta POS se conserva aunque no tenga cliente.", 11, WHITE, True)
+footer(s, 7, total)
+note(s, 1.25, "En lugar de explicar cada línea, veamos tres ejemplos. TRIM y UPPER limpian la membresía. TRY_CONVERT intenta convertir fechas, cantidades, precios y calificaciones sin disfrazar errores. Cuando falta el gasto en CRM, se calcula un proxy de cuatro mil novecientos veinte pesos usando la muestra POS y se deja marcado como imputado. La venta sin cliente se conserva como mostrador.", "Un dato imputado se identifica; no se presenta como valor original.")
+
+# 8 · Reejecución y deduplicación demostradas.
+s = new_slide(prs)
+heading(s, "05 · Idempotencia", "Repetir el proceso no multiplica las ventas", "ROW_NUMBER elige una versión por ID; la llave de Oro protege la venta integrada.")
+add_photo(s, "insight-de-negocio.png", 0.62, 1.85, 4.0, 4.74, focus=(0.7, 0.5))
+add_rect(s, 4.95, 1.92, 7.7, 1.52, PAPER, line="E6DED2")
+add_text(s, 5.25, 2.12, 7.1, 0.28, "PRUEBA DESDE CERO · SQL SERVER 2022", 10, BURGUNDY, True)
+add_text(s, 5.25, 2.53, 7.0, 0.52, "5 filas Bronce  →  5 IDs únicos  →  5 ventas Oro", 20, GREEN, True, face="Georgia")
+add_rect(s, 4.95, 3.77, 7.7, 1.46, PALE_GREEN)
+add_text(s, 5.25, 3.97, 7.05, 0.3, "PRUEBA DE DUPLICADO TARDÍO", 10, GREEN, True)
+add_text(s, 5.25, 4.36, 7.05, 0.65, "Agregamos una versión posterior de POS-805 en el entorno desechable; Oro siguió con 5 ventas y conservó la fecha más reciente.", 13, INK, True)
+add_rect(s, 4.95, 5.55, 7.7, 0.74, PALE_GOLD)
+add_text(s, 5.2, 5.72, 7.18, 0.4, "En la muestra oficial: 0 duplicados. La prueba sintética no se guarda en la base entregada.", 11, INK, True, valign=MSO_ANCHOR.MIDDLE)
+footer(s, 8, total)
+note(s, 1.0, "En la muestra real no hay duplicados. Para probar el caso límite, en un SQL Server temporal agregué una segunda versión de POS-805 con una fecha posterior, reprocesé y comprobé que Oro quedó con cinco transacciones y eligió la versión nueva. Repetir los cuatro scripts también mantuvo cinco ventas. La prueba sintética quedó en el contenedor que eliminé, no en el repositorio.", "La deduplicación se prueba con ROW_NUMBER; la PK por sí sola solo impide la llave repetida.")
+
+# 9 · Calidad con números legibles.
+s = new_slide(prs)
+heading(s, "06 · Calidad y control", "¿Qué pasó con los registros?", "Conteos reproducidos desde la vista oro.vw_Calidad_Integracion.")
+metrics = [
+    ("5 → 5", "POS Bronce → Oro", "Todas válidas en la muestra", GREEN),
+    ("0", "Filas POS inválidas", "Conversiones y rangos", BURGUNDY),
+    ("0", "Clientes / vinos huérfanos", "FK y cruces verificados", GREEN),
+    ("1", "Venta anónima", "Conservada como mostrador", GOLD),
+    ("4 / 4", "Clientes CRM", "1 gasto proxy identificado", GREEN2),
+    ("3 / 3", "Ratings válidos", "Puntajes dentro de rango", BURGUNDY),
+]
+for i, (value, label, detail, tone) in enumerate(metrics):
+    col, row = i % 3, i // 3
+    x, y = 0.62 + col * 4.08, 2.0 + row * 1.77
+    add_rect(s, x, y, 3.82, 1.48, PAPER, line="E7DFD2")
+    add_text(s, x + 0.2, y + 0.12, 3.35, 0.49, value, 24, tone, True, face="Georgia")
+    add_text(s, x + 0.21, y + 0.67, 3.35, 0.25, label, 11, INK, True)
+    add_text(s, x + 0.21, y + 1.03, 3.35, 0.28, detail, 9, MUTED)
+add_text(s, 0.7, 5.84, 12, 0.55, "CHECK: puntaje 0–100 · botellas >0 · precio ≥0. Los conteos describen esta muestra pequeña, no las fuentes completas.", 11, INK, True)
+footer(s, 9, total)
+note(s, 1.5, "La vista de calidad muestra cinco filas POS en Bronce y cinco ventas en Oro. No hubo conversiones inválidas, duplicados ni llaves huérfanas. La transacción anónima se conservó. En CRM hay cuatro clientes únicos y un gasto proxy; los tres ratings son válidos. CHECK valida rangos de puntaje, cantidad de botellas y precio. Es una comprobación de esta muestra, no de datos que no recibimos.", "Bronce y Oro se comparan con números; los filtros y CHECK protegen el destino.")
+
+# 10 · Insight de negocio, limitación estadística visible.
+s = new_slide(prs)
+add_photo(s, "insight-de-negocio.png", 0, 0, 5.25, H, focus=(0.68, 0.5))
+add_rect(s, 5.25, 0, W - 5.25, H, IVORY, radius=False)
+add_text(s, 5.83, 0.48, 6.8, 0.25, "07 · ORO · LECTURA DE NEGOCIO", 10, BURGUNDY, True)
+add_text(s, 5.8, 0.88, 6.8, 0.62, "Una señal para probar", 28, INK, True, face="Georgia")
+add_text(s, 5.83, 1.58, 6.7, 0.33, "Vista oro.vw_Gold_Ventas_Vinos + KPIs por origen y membresía.", 12, MUTED)
+kpis = [("$22,760", "ventas de muestra"), ("63.27%", "ingreso asociado a Rioja"), ("12 / 15", "botellas Platinum >93")]
+for i, (value, label) in enumerate(kpis):
+    y = 2.17 + i * 0.91
+    add_text(s, 5.85, y, 2.5, 0.52, value, 24, GREEN if i != 1 else BURGUNDY, True, face="Georgia")
+    add_text(s, 8.55, y + 0.09, 3.8, 0.36, label, 12, INK, True)
+add_rect(s, 5.8, 5.05, 6.9, 1.15, PALE_GOLD)
+add_text(s, 6.04, 5.2, 6.45, 0.83, "Rioja suma $14,400. Las 12 botellas con puntaje >93 también suman $14,400, pero las compró una sola persona. Correlación de esta muestra; no demuestra causalidad.", 11, INK, True, valign=MSO_ANCHOR.MIDDLE)
+add_text(s, 5.85, 6.51, 6.5, 0.25, "Idea: probar recomendación y medir conversión con más clientes.", 11, GREEN, True)
+footer(s, 10, total)
+note(s, 2.0, "Las cinco ventas suman veintidós mil setecientos sesenta pesos. Rioja aporta catorce mil cuatrocientos pesos, que son 63.27 por ciento de los ingresos. Los vinos con más de 93 puntos también suman catorce mil cuatrocientos, pero las doce botellas corresponden a una sola persona. No concluimos que el puntaje causó la compra. La decisión prudente es probar una recomendación con más clientes y medir conversión e ingreso incremental.", "Una hipótesis medible; no una conclusión causal.")
+
+# 11 · Límites y trabajo no implementado.
+s = new_slide(prs)
+heading(s, "CIERRE · Límites claros", "Lo que este proyecto todavía no puede afirmar", "Separar lo implementado de lo que dependería de otras fuentes.")
+add_photo(s, "clientes-vinicola.png", 0.62, 1.88, 4.35, 4.72, focus=(0.72, 0.5))
+limits = [
+    ("Sin archivos originales", "La demo usa la muestra cargada desde SQL; no prueba ingesta desde CSV/Excel reales."),
+    ("Sin inventario ni e-commerce", "No hay base para recomendar reabasto ni medir conversión en línea."),
+    ("Muestra de 5 ventas", "Los patrones son señales para validar, no una predicción estable."),
+    ("Customer 360 separado", "Tickets, Interacciones y Ventas no están en este modelo vinícola."),
+]
+for i, (head, desc) in enumerate(limits):
+    y = 1.92 + i * 1.11
+    add_rect(s, 5.3, y, 7.25, 0.9, PAPER, line="E6DED2")
+    add_text(s, 5.55, y + 0.12, 2.5, 0.28, head, 11, BURGUNDY, True)
+    add_text(s, 8.05, y + 0.12, 4.2, 0.56, desc, 10, INK)
+footer(s, 11, total)
+note(s, 0.5, "Hay cuatro límites: faltan fuentes originales, no hay inventario ni e-commerce, la muestra es pequeña y Customer 360 es un entregable separado que no está modelado aquí. Para el diccionario separado necesitamos sus definiciones fuente.", "Ser claros sobre el alcance nos permite defender mejor lo implementado.")
+
+# 12 · Entregables / dónde están / pendientes reales.
+s = new_slide(prs, GREEN)
+add_photo(s, "portada-vinicola-golden-hour.png", 7.35, 0, W - 7.35, H, focus=(0.68, 0.52))
+add_rect(s, 0, 0, 7.42, H, GREEN, radius=False)
+heading(s, "08 · Entrega", "Código, visuales y defensa en un solo lugar", "Abrir el clon en GitHub Desktop y después mostrar el tablero privado de Trello.", dark=True)
+deliveries = [
+    ("src/", "4 scripts SQL · orden 01 → 04"),
+    ("assets/", "logo, flujo Medallón, DER y fotos"),
+    ("docs/", "PPT/PDF, guion, Q&A, Plan B y evidencia"),
+    ("README.md", "alcance, ejecución y límites"),
+]
+for i, (name, desc) in enumerate(deliveries):
+    y = 2.0 + i * 0.71
+    add_text(s, 0.75, y, 1.65, 0.3, name, 13, "D7B879", True)
+    add_text(s, 2.35, y, 4.35, 0.37, desc, 12, WHITE)
+add_rect(s, 0.72, 5.15, 6.18, 1.25, "294D43")
+add_text(s, 0.95, 5.34, 5.72, 0.85, "GitHub Desktop: mostrar el clon y la rama local; abrir src/, assets/ y README. Moodle: abre 24-nov 11:00; cierra 26-nov 15:00.", 11, WHITE, True, valign=MSO_ANCHOR.MIDDLE)
+footer(s, 12, total)
+note(s, 1.0, "Abrimos GitHub Desktop y enseñamos el repositorio clonado en local, la rama de entrega, las carpetas src y assets y el README. Después mostramos el tablero privado de Trello. En docs están el PowerPoint editable, el PDF, los guiones, las respuestas y los resultados de Plan B. La tarea de Moodle tiene una ventana definida; la entrega aún es una acción separada.", "La estructura visible coincide con la carpeta publicada en la rama de entrega.")
+
+# 13 · cierre que se puede decir sin leer.
+s = new_slide(prs, GREEN)
+add_photo(s, "uvas-dorado.png", 0, 0, 5.0, H, focus=(0.52, 0.5))
+add_rect(s, 5.0, 0, W - 5.0, H, GREEN, radius=False)
+add_text(s, 5.75, 0.78, 6.6, 0.26, "CIERRE · EQUIPO 2", 10, "D7B879", True)
+add_text(s, 5.75, 1.35, 6.65, 1.2, "Integramos para\npreguntar mejor.", 30, WHITE, True, face="Georgia")
+add_text(s, 5.8, 3.0, 6.4, 0.9, "El siguiente paso es probar la hipótesis con más ventas, perfiles y medición de conversión.", 16, "E8E1D6")
+add_rect(s, 5.8, 4.45, 3.4, 0.47, "2B5548")
+add_text(s, 5.91, 4.55, 3.16, 0.25, "¿PREGUNTAS? · 8 MIN", 11, WHITE, True, align=PP_ALIGN.CENTER)
+add_text(s, 5.8, 5.4, 6.25, 0.6, "Gracias. Ahora respondemos dos preguntas por integrante con evidencia del SQL y las vistas.", 13, WHITE, True)
+add_text(s, 0.62, 7.16, 4.0, 0.18, "INTEGRACIÓN DE DATOS · EQUIPO 2", 8, WHITE, True)
+add_text(s, 11.9, 7.13, 0.78, 0.22, "13 / 13", 9, WHITE, True, align=PP_ALIGN.RIGHT)
+note(s, 0.5, "Integramos estos datos para hacer una mejor pregunta de negocio. El siguiente paso es ampliar la muestra y medir si una recomendación realmente cambia la conversión. Gracias. Estamos listos para las preguntas.", "Cierre con la limitación y el siguiente paso medible.")
 
 prs.save(OUT)
 print(OUT)

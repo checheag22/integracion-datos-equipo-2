@@ -1,53 +1,88 @@
-# Guion de demostración y defensa
+# Guion de exposición y demo — Equipo 2
 
-## Corrida en vivo (2–3 minutos)
+## Duración acordada: 25 minutos
 
-1. Abrir la base de práctica y mostrar que las cinco ventas y las fuentes están en `bronce`.
-2. Mostrar el ejemplo de la diapositiva 5: `Nombre=' sofia mendiolea '` se conserva en minúsculas y sin espacios exteriores tras `TRIM`; `Categoría=' Gold '` queda como `GOLD` con `TRIM`/`UPPER`; el gasto CRM nulo de `CLI-V02` se completa con `$4,920` observado en POS y marcado como proxy imputado. Volver a ejecutar `03_etl_limpieza_plata.sql` y explicar también `TRY_CONVERT`, `COALESCE`, `ROW_NUMBER()` y la protección de llave.
-3. Consultar `oro.vw_Calidad_Integracion`: comparar filas Bronze con ventas Oro, anomalías, nulos y claves únicas.
-4. Consultar `oro.vw_Gold_Ventas_Vinos` y `oro.vw_KPI_Membresia_Canal`; explicar que 12 de 15 botellas Platinum con puntaje >93 representan una persona de cinco ventas, por lo que no se debe generalizar.
-5. Ejecutar `plata.sp_HistorialVentasCliente` para `CLI-V01` del 1 al 3 de agosto de 2026; cierra con `oro.vw_KPI_Origen_Vino` y explica que Rioja aporta `$14,400` (63.27%).
+Moodle pide una exposición de 25–35 minutos. La guía PDF adjunta marca 20–25 minutos en total, con 12–15 minutos de exposición/demo y 6–8 de preguntas. El guion usa el extremo común: **15 minutos de exposición y demo + 8 minutos de preguntas + 2 minutos para transiciones = 25 minutos**. En Moodle se indica que cada integrante debe preparar dos preguntas; el banco oficial trae tres por rol, así que estudien las dos prioritarias y lean la tercera como respaldo.
 
-**Plan B:** llevar capturas recientes de las consultas de Calidad, Vista 360° y KPIs. La captura debe generarse justo antes de exponer con el mismo conjunto de SQL. No usar capturas simuladas como evidencia de ejecución.
+## Orden, quién habla y qué explicar
 
-## Distribución orientativa (12–15 minutos, incluida demo)
+| Diapositiva | Persona | Tiempo | Explicación en una frase |
+|---|---|---:|---|
+| 1 | Ezequiel | 0:30 | Presentar el objetivo y el caso ficticio. |
+| 2 | Ezequiel | 0:45 | Presentar las responsabilidades de los cinco integrantes. |
+| 3 | Ezequiel | 1:00 | Explicar las fuentes disponibles y los límites de la muestra. |
+| 4 | José | 1:15 | Recorrer Bronce → Plata → Oro en el flujo real. |
+| 5 | José | 1:15 | Mostrar PK, FK y tipos del modelo relacional. |
+| 6 | Patricio | 2:30 | Correr ingesta, transformación y consulta Oro en vivo. |
+| 7 | Patricio | 1:15 | Explicar tres reglas de limpieza con ejemplos. |
+| 8 | Patricio | 1:00 | Contar cómo se evita duplicar y qué probó SQL Server. |
+| 9 | Ximena | 1:30 | Leer la calidad en conteos concretos. |
+| 10 | Joel + Ezequiel | 2:00 | Joel lee Oro; Ezequiel interpreta la decisión comercial. |
+| 11 | Ximena | 0:30 | Declarar con claridad qué no puede concluirse. |
+| 12 | Joel | 1:00 | Ubicar los entregables y pendientes en GitHub Desktop/Trello. |
+| 13 | Ezequiel | 0:30 | Cerrar con el siguiente paso medible e invitar preguntas. |
+| **Exposición + demo** |  | **15:00** |  |
+| **Preguntas** | Todos | **8:00** | Dos respuestas por integrante, alrededor de 48 segundos cada una. |
+| **Transiciones y preparación de pantalla** | Todos | **2:00** | Cambios de expositor/ventana y margen técnico. |
+| **Total** |  | **25:00** |  |
 
-- Ezequiel, Líder de Proyecto: propósito, alcance y coordinación del cierre (2–3 min).
-- José, Arquitecto: fuentes, arquitectura, DER, PK/FK y repositorio (2.5 min).
-- Patricio, Ingeniero ETL: limpieza, idempotencia y corrida en vivo (4.5 min incluida demo).
-- Ximena, QA: calidad, controles y límites de la muestra (2 min).
-- Joel, BI + Documentación y Trello: lectura de Oro, insight, repositorio y tablero (2–3 min).
-- Transiciones y preguntas al público: 0.5–1 min. Después reservar 6–8 min para preguntas individuales por rol.
+La asignación de roles y nombres sigue el banco oficial. Para cinco integrantes, la guía también pide dividir Liderazgo y BI: Joel muestra la lectura de la vista como parte del bloque documental y Ezequiel la traduce a decisión. Ezequiel conserva la respuesta comercial oficial del banco.
 
-La guía oficial divide Liderazgo/BI para equipos de cinco; el banco oficial de preguntas mantiene a Ezequiel como Líder + BI y a Joel como Documentación/Trello. Para la exposición oral, Joel presenta BI junto con el repositorio. Ambos preparan el insight y Ezequiel contesta la pregunta de decisión que aparece a su nombre en el banco.
+## Guion fácil de decir
 
-## Banco oficial de preguntas por rol
+### 1–3 · Ezequiel — propósito, roles y alcance
 
-Las 15 preguntas y respuestas justificadas con el SQL de la entrega están en `docs/respuestas-banco-preguntas-por-rol.md`. El archivo fuente oficial del Equipo 2 se conserva en `docs/banco-preguntas-oficial-equipo-2.pdf`.
+> “Somos el Equipo 2. Conectamos ventas POS, clientes del CRM y calificaciones de vinos en SQL Server para saber qué se vendió, por qué canal y con qué perfil. Viñedos del Alba es un nombre ficticio para este caso. La muestra tiene cinco ventas, cuatro clientes y tres vinos. No recibimos los archivos originales ni datos de inventario o venta web.”
 
-El modelo `Customer 360` (Tickets, Interacciones y Ventas) y las propiedades `MS_Description` no están implementados en el script actual; se deben explicar como pendientes y fuera del alcance de la muestra actual.
+En la diapositiva 2, indicar en una frase quién lleva Arquitectura, ETL, QA, Liderazgo/BI y Documentación/Trello. Los nombres y roles coinciden con el banco oficial.
 
-### Arquitectura — José
-- **¿Por qué Bronze guarda texto?** Para preservar el dato de origen y diagnosticar valores inválidos antes de asignar tipos.
-- **¿Qué relación es una FK física?** `oro.Fact_Ventas_POS.ID_Cliente` apunta a `plata.Dim_Clientes.ID_Cliente`; `SKU_Vino` apunta a `plata.Dim_Vinos`.
-- **¿Cómo se conecta cada fuente?** POS con CRM por `ID_Cliente` y ventas con ratings por `SKU_Vino`.
+### 4–5 · José — arquitectura y modelo
 
-### ETL — Patricio
-- **¿Qué vuelve idempotente la carga?** La inserción Bronze evita filas de muestra idénticas; el ETL deduplica por llave natural y la venta Oro se inserta por `ID_Venta_POS`.
-- **¿Qué significa el valor $4,920?** Es el total observado de POS para `CLI-V02`, usado como proxy porque falta el gasto CRM; no es gasto anual confirmado.
-- **¿Cómo tratarían un duplicado tardío?** `ROW_NUMBER()` ordena por fecha y desempata por ID de fila de ingesta; el reproceso actualiza la llave Oro.
+> “Bronce conserva los valores como llegaron; Plata limpia y relaciona; Oro concentra las ventas y las vistas de consumo. En el hecho de ventas, la llave primaria identifica la transacción y las llaves foráneas conectan Cliente y Vino. Si falta el cliente, se conserva la venta bajo CLI-MOSTRADOR. La relación con Customer 360 no está implementada.”
 
-### Calidad — Ximena
-- **¿Qué anomalías aparecen?** Un `ID_Cliente` nulo en POS y un gasto CRM nulo; no hay filas inválidas ni duplicados en la muestra entregada.
-- **¿Se pierde la venta anónima?** No. Se asigna a `CLI-MOSTRADOR` y se conserva para el total de ingresos.
-- **¿Qué hacen las restricciones?** FK evita clientes/vinos huérfanos en Oro; `CHECK` limita puntuación, botellas y precio.
+### 7–8 · Patricio — limpieza e idempotencia
 
-### Liderazgo y BI — Ezequiel
-- **¿Cuál es el alcance?** La muestra integra POS, CRM y ratings; no hay registros para probar inventario ni órdenes web.
-- **¿Qué decisión permiten los datos?** Probar una recomendación de etiquetas >93 para clientes Platinum y medir conversión e ingreso incremental con más clientes; la muestra pequeña no prueba causalidad.
-- **¿Cuál es el hallazgo principal?** Rioja aporta `$14,400` (63.27%) y los vinos >93 puntos también `$14,400`, por 12 botellas de Tempranillo Rioja con 93.8 puntos.
+> “TRIM quita espacios, UPPER normaliza categorías y TRY_CONVERT convierte valores solo cuando son válidos. El gasto faltante de CLI-V02 usa un proxy de $4,920 derivado de POS y queda marcado como imputado. ROW_NUMBER escoge una versión por ID; repetir el proceso conserva cinco ventas en Oro.”
 
-### Documentación y Trello — Joel
-- **¿Qué falta documentar?** El diccionario de `Customer 360` debe definir Tickets, Interacciones y Ventas; esas tablas no están implementadas en el SQL actual.
-- **¿Para qué usar `MS_Description`?** Mantiene definiciones consultables junto a tablas y columnas; esta mejora aún no está implementada en el script.
-- **¿Cómo está Trello?** El tablero privado ya tiene nombre conceptual, descripción y columnas de avance; quedan tareas de ensayo, capturas recientes y Moodle.
+### 9 · Ximena — calidad
+
+> “La vista de calidad compara cinco registros POS en Bronce con cinco ventas en Oro. Hay cero filas POS inválidas, cero claves huérfanas y una venta anónima preservada. Los tres ratings son válidos y el gasto de un cliente está marcado como proxy. Estos conteos describen esta muestra, no sistemas completos.”
+
+### 10 · Joel + Ezequiel — lectura de Oro
+
+**Joel:** “La vista Oro muestra $22,760 en cinco ventas; Rioja aporta $14,400, 63.27% de los ingresos. En el segmento Platinum, 12 de 15 botellas superan 93 puntos.”
+
+**Ezequiel:** “Las doce botellas son de una sola persona. Proponemos probar una recomendación con más clientes y medir conversión; estos datos no demuestran causalidad.”
+
+### 6 · Patricio — demostración real (2:30)
+
+Preparar SQL Server Management Studio (SSMS) con la base `DB_Vinicola_Integration` creada y los cuatro archivos del repositorio abiertos. La demostración muestra que la ingesta se puede volver a ejecutar, el procedimiento transforma los datos, la vista cuantifica calidad y Oro responde una pregunta. No hay que teclear los archivos durante la exposición.
+
+1. Ejecutar `02_etl_ingesta_bronce.sql`; mostrar que la muestra permanece en 5 filas de POS, sin agregar las mismas filas otra vez.
+2. Ejecutar `03_etl_limpieza_plata.sql`; explicar `TRIM`/`UPPER`, `TRY_CONVERT`, `ROW_NUMBER()` y la venta anónima.
+3. Ejecutar `04_vistas_gold_bi.sql`; mostrar `oro.vw_Calidad_Integracion` y `oro.vw_Gold_Ventas_Vinos`. Preguntar: “¿Qué compró CLI-V01 y qué puntaje tenía el vino?”
+4. Cerrar con Rioja: `$14,400` de ingresos, sin afirmar que el puntaje causó la venta.
+
+**Antes de la presentación:** probar estos tres pasos en la computadora e instancia que se usarán. La ejecución limpia de los cuatro scripts ya se verificó por separado y el log reciente está en `docs/evidencia-ejecucion-sqlserver-2026-11-23.txt`.
+
+### 11 · Ximena — límites
+
+> “No podemos recomendar inventario ni evaluar e-commerce porque esas fuentes no están en el alcance. Customer 360 es un modelo separado y no está en este SQL. Tampoco generalizamos a partir de cinco ventas.”
+
+### 12 · Joel — entrega
+
+> “En `src` están los cuatro scripts en orden; en `assets`, el logo, el flujo, el DER y las imágenes; en `docs`, la presentación, las respuestas, el Plan B y la evidencia de ejecución. El tablero de Trello es privado. Antes de la entrega verificaremos el ensayo y cualquier requisito separado de Customer 360.”
+
+### 13 · Ezequiel — cierre
+
+> “Integramos para preguntar mejor. El siguiente paso es ampliar la muestra y medir si la recomendación realmente cambia la conversión. Gracias; estamos listos para responder.”
+
+## Plan B
+
+El PDF ya lleva los conteos, el insight y las tres acciones de la demo. El log de ejecución guarda resultados reales obtenidos en SQL Server 2022 desde una base temporal limpia. No es una captura de SSMS; si el docente solicita una captura visual de esa interfaz, hay que generarla en la computadora de exposición y presentarla como respaldo.
+
+## Referencias rápidas
+
+- Banco oficial y respuestas razonadas: `docs/respuestas-banco-preguntas-por-rol.md`.
+- Salida reciente: `docs/plan-b-resultados.md` y `docs/evidencia-ejecucion-sqlserver-2026-11-23.txt`.
+- Scripts: `src/01_ddl_arquitectura_der.sql` → `src/02_etl_ingesta_bronce.sql` → `src/03_etl_limpieza_plata.sql` → `src/04_vistas_gold_bi.sql`.

@@ -1,41 +1,36 @@
-# Plan B — resultados recientes para la exposición
+# Plan B — resultados de la corrida SQL Server
 
-Ejecución verificada el 23 de noviembre de 2026 en SQL Server 2022 temporal; los cuatro scripts se ejecutaron en orden. La base desechable se eliminó al finalizar. Estos resultados son la referencia de respaldo, no sustituyen la corrida en vivo.
+**Última comprobación:** 23 de noviembre de 2026. SQL Server 2022, contenedor temporal aislado, base vacía, cuatro scripts ejecutados en orden. La evidencia completa de consola está en `docs/evidencia-ejecucion-sqlserver-2026-11-23.txt`. La instancia temporal se elimina al terminar la verificación.
 
-## Muestra oficial
+## Conteos reproducidos
 
-| Control | Resultado |
-|---|---:|
-| POS en Bronce | 5 filas |
-| IDs POS únicos | 5 |
-| Transacciones en Oro | 5 |
-| Filas POS inválidas | 0 |
-| Clientes POS huérfanos | 0 |
-| Vinos POS huérfanos | 0 |
-| Venta con cliente nulo, preservada como mostrador | 1 |
-| Clientes CRM | 4 |
-| Ratings / vinos válidos | 3 / 3 |
-| Botellas e ingresos POS | 24 / $22,760 MXN |
-| Proxy imputado de CLI-V02 | $4,920 MXN; no equivale a gasto anual confirmado |
+| Control | Resultado | Lectura sencilla |
+|---|---:|---|
+| POS en Bronce → ventas en Oro | 5 → 5 | Las cinco ventas válidas se integran |
+| IDs de venta distintos en Bronce | 5 | No había duplicados en la muestra real |
+| Filas POS inválidas | 0 | Las conversiones y rangos pasan |
+| Clientes / vinos huérfanos | 0 / 0 | Ninguna relación falta |
+| Venta anónima | 1 / $450 MXN | Se conserva bajo `CLI-MOSTRADOR` |
+| CRM | 4 filas / 4 clientes | Un gasto se marca como proxy |
+| Ratings | 3 filas / 3 válidos | No hay puntajes inválidos |
+| Ventas / botellas / ingresos Oro | 5 / 24 / $22,760 MXN | Totales observados |
+| Ticket promedio | $4,552 MXN | Promedio de cinco transacciones |
+| Proxy de `CLI-V02` | $4,920 MXN | No es gasto anual confirmado |
 
-## KPIs del caso
+## Dos lecturas de negocio
 
-- Platinum: 12 de 15 botellas (80%) corresponden a vino con puntaje >93; las 12 son de un cliente en esta muestra.
-- Origen: Rioja 12 botellas (50%); Mendoza 8 (33.33%); Valle de Guadalupe 4 (16.67%).
-- Ingresos por origen: Rioja $14,400 (63.27%); Mendoza $6,560 (28.82%); Valle de Guadalupe $1,800 (7.91%).
+- Rioja: 12 botellas y `$14,400 MXN`, el 63.27% del ingreso observado.
+- Platinum: 12 de 15 botellas (80%) tienen puntaje >93; las compró una persona en esta muestra.
+- Interpretación: hipótesis para medir con una prueba y más clientes; no es causalidad ni patrón validado.
 
-## Prueba de duplicado y reejecución
+## Alcance de la corrida
 
-Se agregó solo al entorno desechable una segunda fila `POS-805`, con fecha posterior. Resultado al volver a procesar y ejecutar todos los scripts:
+- Las cinco vistas (`oro`) respondieron y los siete procedimientos (`plata`) se ejecutaron, incluido el registro de un cliente temporal dentro de una transacción revertida.
+- La reejecución de ingesta/ETL y del script de vistas conservó cinco ventas, cinco IDs únicos, 24 botellas y `$22,760 MXN`.
+- Los cuatro scripts también se ejecutaron otra vez, en orden y sin errores, sobre la misma base temporal; los conteos se mantuvieron en 5 ventas, 24 botellas y `$22,760 MXN`.
+- En una prueba aislada se agregó una segunda versión posterior de `POS-805`. Al reprocesar, Oro mantuvo cinco ventas y eligió la fecha más reciente. Se borró la fila de prueba al finalizar; los datos de la muestra volvieron a quedar en su estado original.
+- Los scripts no fueron conectados a una instancia persistente; el contenedor QA fue desechable.
 
-```text
-Bronce POS: 6 filas
-IDs POS distintos: 5
-Duplicados identificados: 1
-Oro: 5 ventas · $22,760 MXN
-La fila con fecha más reciente fue la integrada
-Vistas Oro: 5 · Procedimientos Plata: 7
-ALL ASSERTS PASSED
-```
+## Uso durante la exposición
 
-Los scripts no eliminan bases/tablas y vuelven a ejecutarse sin duplicar las cinco llaves de Oro. Para la exposición, guardar además capturas reales de SSMS de las tres consultas clave en el equipo que se usará para la demo.
+Intentar la corrida en vivo primero. Si SQL Server/SSMS falla, abrir el PPT/PDF final y este resumen; también se conserva el log completo en la carpeta `docs/`. El log es salida real de `sqlcmd`, **no una captura de SSMS**. Si piden una captura de la interfaz, habrá que tomarla en la computadora donde se hará la exposición y nombrarla como respaldo.

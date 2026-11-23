@@ -61,6 +61,7 @@ docs/
 ├── banco-preguntas-oficial-equipo-2.pdf
 ├── respuestas-banco-preguntas-por-rol.md
 ├── plan-b-resultados.md
+├── evidencia-ejecucion-sqlserver-2026-11-23.txt
 └── guia-presentacion-proyecto-final.pdf
 tasks/
 └── generate_presentation.py
@@ -72,8 +73,8 @@ README.md
 3. `03_etl_limpieza_plata.sql`: siete procedimientos, conversiones, estandarización, deduplicación e integración idempotente.
 4. `04_vistas_gold_bi.sql`: cinco vistas Oro, KPIs y validaciones cuantitativas.
 
-El deck del avance previo se conserva en `docs/archivo-historico/`; el archivo final para exponer es `docs/presentacion-final-equipo-2.pptx` (también exportado a PDF). El guion por rol, la guía corta para ensayar preguntas y la salida de Plan B están en `docs/demo-y-guion.md`, `docs/guion-rapido-por-integrante.md` y `docs/plan-b-resultados.md`.
-La guía de avance anterior también queda en `docs/archivo-historico/`; la guía que rige esta presentación está en `docs/guia-presentacion-proyecto-final.pdf`.
+El deck del avance previo se conserva en `docs/archivo-historico/`; la presentación final editable tiene 13 diapositivas, incluye la matriz de roles, notas del expositor y un plan de 25 minutos; su PDF está junto al PowerPoint. El guion por rol, las dos preguntas prioritarias por integrante y el Plan B están en `docs/demo-y-guion.md`, `docs/guion-rapido-por-integrante.md` y `docs/plan-b-resultados.md`.
+La guía de avance anterior también queda en `docs/archivo-historico/`; la guía que rige esta presentación está en `docs/guia-presentacion-proyecto-final.pdf`. Moodle pide 25–35 minutos. El guion usa 15 minutos de exposición/demo, 8 de preguntas y 2 de transiciones (25 minutos en total), en el extremo superior de la guía PDF.
 
 ### Ejecución
 
@@ -83,14 +84,14 @@ La carga actual utiliza `INSERT` y `OPENJSON`; no usa `BULK INSERT` porque los a
 
 ### Calidad y resultados reproducibles
 
-- POS: 5 filas crudas, 5 IDs únicos, 5 ventas Oro; 0 filas inválidas en la muestra y 1 cliente nulo preservado como anónimo.
+- POS: 5 filas crudas, 5 IDs únicos, 5 ventas Oro; 0 filas inválidas, 0 huérfanos y 1 cliente nulo preservado como anónimo.
 - CRM: 4 filas / 4 IDs únicos; 1 gasto imputado como proxy observado.
 - Ratings: 3 filas / 3 vinos válidos.
 - Oro: 24 botellas; ingresos de $22,760 MXN; venta anónima de $450 MXN.
 - Platinum: 12 de 15 botellas (80%) corresponden a vino con puntaje >93; las 12 pertenecen a una sola persona en esta muestra.
 - Origen: Rioja 12 botellas (50%), Mendoza 8 (33.33%) y Valle de Guadalupe 4 (16.67%).
 
-La muestra no tiene filas duplicadas. La deduplicación se comprobó en un SQL Server desechable insertando una segunda fila POS con la misma llave y nueva fecha; Plata/Oro conservó una venta por llave y actualizó la versión elegida por fecha más reciente.
+La muestra no tiene filas duplicadas. La deduplicación se comprobó en SQL Server 2022 desechable insertando una versión posterior de POS-805; Oro conservó cinco ventas y eligió la fecha más reciente. Los cuatro scripts se ejecutaron dos veces desde una base vacía y mantuvieron los conteos. En otra prueba consulté las cinco vistas y ejecuté los siete procedimientos. La consola real está en `docs/evidencia-ejecucion-sqlserver-2026-11-23.txt`; es salida de `sqlcmd`, no captura de SSMS.
 
 ## 5. Integrantes y roles (cinco personas)
 
