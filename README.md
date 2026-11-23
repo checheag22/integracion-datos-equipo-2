@@ -1,39 +1,90 @@
-# Integración de Datos — Equipo 2
+# Integración de Datos para una Vinícola — Equipo 2
+### Arquitectura Medallón en Microsoft SQL Server
 
-Proyecto académico de integración POS + CRM + ratings de vinos para Otoño 2026.
+**Materia:** Integración de Datos | Universidad Iberoamericana León
 
-## Estado técnico
+**Equipo:** 2 | **Tablero Trello:** [Vinícola — tablero del equipo](https://trello.com/b/fUVw5rtM) *(la lectura del tablero requiere iniciar sesión; el permiso de solo lectura no pudo verificarse en esta sesión).*
 
-- `sql/script.sql` ejecutó completo en SQL Server 2022 aislado el 29-oct-2026; pasó los ASSERTS de 5 ventas, 24 botellas, $22,760 MXN, una venta anónima y gasto imputado de $4,920 para CLI-V02.
-- Crea 5 vistas y 7 procedimientos. El KPI incluye COUNT, SUM, AVG y GROUP BY.
-- La consulta de Platinum arroja 12 de 15 botellas (80%) con puntaje >93; en esta muestra corresponden a una persona. Por origen geográfico: Rioja 12 botellas, Mendoza 8 y Valle de Guadalupe 4.
-- El alcance verificable es pequeño: 5 transacciones POS, 4 registros CRM y 3 vinos. No hay inventario ni ventas web. El valor de $4,920 es un proxy del gasto observado en la muestra, no un gasto anual confirmado.
+![Marca gráfica del proyecto](assets/logo_negocio.png)
 
-## Archivos
+> La marca gráfica incluida identifica el proyecto académico; no sustituye el logotipo comercial oficial de la vinícola.
 
-- `docs/avance-equipo-2.pptx`: presentación del avance compartida en Teams.
-- `docs/avance.docx`: avance técnico editable. La invitación privada de Trello se sustituyó por el enlace corto que aparece en la presentación; confirmar que sea de solo lectura. La captura Trello incrustada es antigua y debe reemplazarse.
-- `docs/guia-oficial-avance.pdf`: requisitos oficiales del avance.
-- `sql/script.sql`: DDL, muestra, ETL, vistas, procedimientos y consultas.
+## 1. Descripción del proyecto
 
-## Ejecución
+El proyecto consolida ventas de punto de venta (POS), clientes del CRM y calificaciones de vinos. El cruce se realiza mediante `ID_Cliente` y `SKU_Vino`. La muestra disponible contiene cinco transacciones POS, cuatro clientes CRM y tres vinos con ratings. No se recibieron datos de inventario ni órdenes de comercio electrónico; por tanto, el análisis no los atribuye al negocio.
 
-Requiere SQL Server 2022 (o versión compatible) y `sqlcmd`. Ejecutar desde una base/instancia de práctica con permisos para crear `DB_Vinicola_Integration`. El script recrea las vistas, procedimientos y tablas que enumera dentro de esa base; **no ejecutarlo sobre una base de trabajo con datos que deban conservarse**. No guardar contraseñas en este repositorio.
+La muestra POS suma 24 botellas y $22,760 MXN. Una transacción con cliente nulo se conserva bajo `CLI-MOSTRADOR`. El gasto ausente de `CLI-V02` se completa con $4,920 MXN observados en la muestra POS y se marca `Gasto_Fue_Imputado=1`; no es un gasto anual confirmado.
 
-Ejemplo con autenticación integrada:
+## 2. Arquitectura de integración (SQL Server)
 
-```sh
-sqlcmd -C -b -S localhost -E -i sql/script.sql
+![Flujo de integración Medallón](assets/flujo_medallon_sql.png)
+
+- **Bronce (`bronce`):** conserva texto crudo de POS, CRM y ratings; permite rastrear filas repetidas y valores que no convierten.
+- **Plata (`plata`):** estandariza con `TRIM`/`UPPER`, convierte con `TRY_CONVERT`, resuelve duplicados por llave de negocio con `ROW_NUMBER()` y aplica reglas y claves.
+- **Oro (`oro`):** concentra los hechos POS y expone vistas para análisis, calidad y KPIs.
+
+La ingesta de demostración usa datos de referencia incluidos en SQL y un objeto JSON de ejemplo. Los archivos originales CSV/JSON/SQL no estaban disponibles en el paquete local; las cargas deben reemplazarse por fuentes originales si el equipo las recupera.
+
+## 3. Modelo entidad-relación (DER)
+
+![Diagrama Entidad-Relación](assets/diagrama_der_sqlserver.png)
+
+Las llaves foráneas físicas salen de `oro.Fact_Ventas_POS` hacia `plata.Dim_Clientes` y `plata.Dim_Vinos`. Las líneas punteadas representan transformación ETL, no relaciones físicas.
+
+## 4. Estructura del repositorio (`/src`)
+
+```text
+src/
+├── 01_ddl_arquitectura_der.sql
+├── 02_etl_ingesta_bronce.sql
+├── 03_etl_limpieza_plata.sql
+└── 04_vistas_gold_bi.sql
+assets/
+├── logo_negocio.png
+├── flujo_medallon_sql.png
+└── diagrama_der_sqlserver.png
+docs/
+├── presentacion-final-equipo-2.pptx / .pdf
+├── avance.docx / .pdf
+├── demo-y-guion.md
+├── plan-b-resultados.md
+└── guia-presentacion-proyecto-final.pdf
+README.md
 ```
 
-## Pendientes conocidos
+1. `01_ddl_arquitectura_der.sql`: base de datos, esquemas, tablas, PK, FK y restricciones.
+2. `02_etl_ingesta_bronce.sql`: cargas de muestra SQL, CRM y JSON; evita reinsertar una fila idéntica.
+3. `03_etl_limpieza_plata.sql`: siete procedimientos, conversiones, estandarización, deduplicación e integración idempotente.
+4. `04_vistas_gold_bi.sql`: cinco vistas Oro, KPIs y validaciones cuantitativas.
 
-1. Confirmar roles con todos los integrantes y actualizar las notas del PPT, que aún mencionan el nombre antiguo `SQL_Equipo2_OpcionA_FINAL.sql`.
-2. Actualizar Trello con tareas/responsables, captura real del tablero y permiso de lectura; validar el enlace. La guía exige las listas Backlog/Por hacer, En proceso, En revisión y Concluido.
-3. Completar el PDF ejecutivo para Moodle. El estado de entrega/calificación no se pudo confirmar.
-4. La deduplicación con `ROW_NUMBER()` se describe como futura; no está implementada para ingestas con IDs repetidos.
-5. La presentación necesita mostrar la comparación completa de Platinum, el cruce ciudad de entrega/canal y volúmenes por origen.
-6. El DER aparece como imagen, pero no se encontró el `.dot` editable.
-7. El diccionario `DB_Customer_360` es una actividad separada de este caso vinícola y conserva tres tablas sin descripción; aclarar también la nomenclatura de esa base.
+El deck del avance previo se conserva en `docs/archivo-historico/`; el archivo final para exponer es `docs/presentacion-final-equipo-2.pptx` (también exportado a PDF). El guion por rol y la salida de Plan B están en `docs/demo-y-guion.md` y `docs/plan-b-resultados.md`.
+La guía de avance anterior también queda en `docs/archivo-historico/`; la guía que rige esta presentación está en `docs/guia-presentacion-proyecto-final.pdf`.
 
-Los archivos originales POS/CSV/JSON mencionados en la presentación no estaban en la carpeta local revisada; el SQL contiene la muestra de forma embebida. Las muestras y resultados son demostrativos y no sustentan conclusiones generales de negocio.
+### Ejecución
+
+En SQL Server 2022, abrir y ejecutar los cuatro archivos en orden (`01` → `04`) dentro de una instancia de práctica. Repetir el flujo es seguro para esta carga de demostración: no borra bases ni tablas, la ingesta exacta evita duplicados y la integración vuelve a procesar las llaves sin duplicar ventas Oro.
+
+La carga actual utiliza `INSERT` y `OPENJSON`; no usa `BULK INSERT` porque los archivos originales no se incluyeron. No ejecutar sobre una instancia con políticas que impidan crear `DB_Vinicola_Integration`.
+
+### Calidad y resultados reproducibles
+
+- POS: 5 filas crudas, 5 IDs únicos, 5 ventas Oro; 0 filas inválidas en la muestra y 1 cliente nulo preservado como anónimo.
+- CRM: 4 filas / 4 IDs únicos; 1 gasto imputado como proxy observado.
+- Ratings: 3 filas / 3 vinos válidos.
+- Oro: 24 botellas; ingresos de $22,760 MXN; venta anónima de $450 MXN.
+- Platinum: 12 de 15 botellas (80%) corresponden a vino con puntaje >93; las 12 pertenecen a una sola persona en esta muestra.
+- Origen: Rioja 12 botellas (50%), Mendoza 8 (33.33%) y Valle de Guadalupe 4 (16.67%).
+
+La muestra no tiene filas duplicadas. La deduplicación se comprobó en un SQL Server desechable insertando una segunda fila POS con la misma llave y nueva fecha; Plata/Oro conservó una venta por llave y actualizó la versión elegida por fecha más reciente.
+
+## 5. Integrantes y roles (cinco personas)
+
+La guía conserva cuatro roles oficiales y divide el rol integrado de Liderazgo/BI en dos personas para equipos de cinco.
+
+- **Data Architect / SQL Specialist:** José Hernández.
+- **Data Engineer / Pipeline Lead:** Patricio García.
+- **Data Quality & QA Specialist:** Ximena Ibarra.
+- **Líder de Proyecto:** Ezequiel Aguilera.
+- **BI & Analytics Specialist:** Joel Ibarra.
+
+La distribución sigue los roles propuestos en el avance; requiere que los cinco integrantes mantengan la misma asignación al exponer.
