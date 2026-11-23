@@ -3,7 +3,7 @@
 ## Corrida en vivo (2–3 minutos)
 
 1. Abrir la base de práctica y mostrar que las cinco ventas y las fuentes están en `bronce`.
-2. Volver a ejecutar `03_etl_limpieza_plata.sql`. Explicar `TRY_CONVERT`, `TRIM`, `UPPER`, `COALESCE`, `ROW_NUMBER()` y la protección de llave.
+2. Mostrar el ejemplo de la diapositiva 5: `Nombre=' sofia mendiolea '` se conserva en minúsculas y sin espacios exteriores tras `TRIM`; `Categoría=' Gold '` queda como `GOLD` con `TRIM`/`UPPER`; el gasto CRM nulo de `CLI-V02` se completa con `$4,920` observado en POS y marcado como proxy imputado. Volver a ejecutar `03_etl_limpieza_plata.sql` y explicar también `TRY_CONVERT`, `COALESCE`, `ROW_NUMBER()` y la protección de llave.
 3. Consultar `oro.vw_Calidad_Integracion`: comparar filas Bronze con ventas Oro, anomalías, nulos y claves únicas.
 4. Consultar `oro.vw_Gold_Ventas_Vinos` y `oro.vw_KPI_Membresia_Canal`; explicar que 12 de 15 botellas Platinum con puntaje >93 representan una persona de cinco ventas, por lo que no se debe generalizar.
 5. Cerrar con `oro.vw_KPI_Origen_Vino`: Rioja aporta 12 botellas, Mendoza 8 y Valle de Guadalupe 4.

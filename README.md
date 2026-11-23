@@ -42,13 +42,16 @@ src/
 assets/
 ├── logo_negocio.png
 ├── flujo_medallon_sql.png
-└── diagrama_der_sqlserver.png
+├── diagrama_der_sqlserver.png
+└── portada-vinicola-golden-hour.png
 docs/
 ├── presentacion-final-equipo-2.pptx / .pdf
 ├── avance.docx / .pdf
 ├── demo-y-guion.md
 ├── plan-b-resultados.md
 └── guia-presentacion-proyecto-final.pdf
+tasks/
+└── presentation_polish.py
 README.md
 ```
 
@@ -88,3 +91,7 @@ La guía conserva cuatro roles oficiales y divide el rol integrado de Liderazgo/
 - **BI & Analytics Specialist:** Joel Ibarra.
 
 La distribución sigue los roles propuestos en el avance; requiere que los cinco integrantes mantengan la misma asignación al exponer.
+
+## Presentación final
+
+La portada usa una imagen conceptual generada para este proyecto; no representa una ubicación o marca comercial confirmada. La diapositiva de ETL muestra valores reales de la muestra antes y después de estandarizar. La presentación editable y su PDF están en `docs/`.
