@@ -1,13 +1,15 @@
-# Integración de Datos para una Vinícola — Equipo 2
+# Viñedos del Alba — Integración de Datos, Equipo 2
 ### Arquitectura Medallón en Microsoft SQL Server
+
+**Viñedos del Alba** es un nombre ficticio y coherente para este caso académico; no identifica una marca comercial verificada.
 
 **Materia:** Integración de Datos | Universidad Iberoamericana León
 
-**Equipo:** 2 | **Tablero Trello:** [Vinícola — tablero del equipo](https://trello.com/b/fUVw5rtM) *(la lectura del tablero requiere iniciar sesión; el permiso de solo lectura no pudo verificarse en esta sesión).*
+**Equipo:** 2 | **Tablero Trello:** [Proyecto Integrador · Viñedos del Alba](https://trello.com/b/fUVw5rtM) *(tablero privado del equipo).*
 
-![Marca gráfica del proyecto](assets/logo_negocio.png)
+![Símbolo gráfico conceptual de Viñedos del Alba](assets/logo_negocio.png)
 
-> La marca gráfica incluida identifica el proyecto académico; no sustituye el logotipo comercial oficial de la vinícola.
+> El símbolo y el nombre identifican el caso académico ficticio; no representan una marca comercial verificada.
 
 ## 1. Descripción del proyecto
 
@@ -43,15 +45,18 @@ assets/
 ├── logo_negocio.png
 ├── flujo_medallon_sql.png
 ├── diagrama_der_sqlserver.png
-└── portada-vinicola-golden-hour.png
+├── portada-vinicola-golden-hour.png
+├── uvas-dorado.png
+├── bodega-barricas.png
+└── logo_conceptual-alba.png
 docs/
 ├── presentacion-final-equipo-2.pptx / .pdf
 ├── avance.docx / .pdf
 ├── demo-y-guion.md
+├── banco-preguntas-oficial-equipo-2.pdf
+├── respuestas-banco-preguntas-por-rol.md
 ├── plan-b-resultados.md
 └── guia-presentacion-proyecto-final.pdf
-tasks/
-└── presentation_polish.py
 README.md
 ```
 
@@ -82,16 +87,16 @@ La muestra no tiene filas duplicadas. La deduplicación se comprobó en un SQL S
 
 ## 5. Integrantes y roles (cinco personas)
 
-La guía conserva cuatro roles oficiales y divide el rol integrado de Liderazgo/BI en dos personas para equipos de cinco.
+La distribución coincide con los cinco roles del banco oficial de evaluación del Equipo 2.
 
 - **Data Architect / SQL Specialist:** José Hernández.
 - **Data Engineer / Pipeline Lead:** Patricio García.
 - **Data Quality & QA Specialist:** Ximena Ibarra.
-- **Líder de Proyecto:** Ezequiel Aguilera.
-- **BI & Analytics Specialist:** Joel Ibarra.
+- **Líder de Proyecto y BI Specialist:** Ezequiel Aguilera.
+- **Documentación y Trello:** Joel Ibarra.
 
-La distribución sigue los roles propuestos en el avance; requiere que los cinco integrantes mantengan la misma asignación al exponer.
+La distribución sigue el banco oficial de evaluación por rol del Equipo 2.
 
 ## Presentación final
 
-La portada usa una imagen conceptual generada para este proyecto; no representa una ubicación o marca comercial confirmada. La diapositiva de ETL muestra valores reales de la muestra antes y después de estandarizar. La presentación editable y su PDF están en `docs/`.
+La portada y las imágenes de uvas y bodega son visuales conceptuales generados para este proyecto; no representan una ubicación o marca comercial confirmada. La diapositiva de ETL muestra valores reales de la muestra antes y después de estandarizar. La presentación editable, su PDF y la guía de respuestas del banco oficial están en `docs/`.
