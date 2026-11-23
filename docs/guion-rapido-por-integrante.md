@@ -19,23 +19,23 @@ El banco oficial conserva a Ezequiel como Líder + BI y a Joel como Documentaci�
 
 ### Ezequiel — apertura y cierre
 
-> “Integramos ventas POS, clientes del CRM y calificaciones de vinos en SQL Server. La muestra tiene cinco ventas; no recibimos archivos originales, inventario ni datos web. Los resultados permiten proponer una prueba, no generalizar. Viñedos del Alba es un nombre ficticio para el caso.”
+> “Integramos ventas POS, clientes del CRM y calificaciones de vinos en SQL Server. La base tiene cinco ventas válidas y tres filas sintéticas sucias para explicar la limpieza. Viñedos del Alba es ficticio; faltan archivos fuente, inventario y datos web.”
 
 **Insight:** “Rioja aporta $14,400, 63.27% del ingreso. Doce de quince botellas Platinum superan 93 puntos, pero las compró una persona. Probaríamos una recomendación y mediríamos conversión con más clientes.”
 
 ### José — arquitectura y modelo
 
-> “Bronce conserva; Plata limpia y relaciona; Oro contiene el hecho de ventas y las vistas. La venta tiene una PK y dos FKs hacia cliente y vino. Una venta sin cliente se conserva como CLI-MOSTRADOR.”
+> “Bronce guarda lo recibido; Plata limpia y conecta clientes y vinos; Oro publica ventas y vistas. La venta tiene una PK y dos FKs. Si no hay cliente, conserva la venta como CLI-MOSTRADOR.”
 
 ### Patricio — ETL y demo
 
-> “TRIM y UPPER normalizan texto; TRY_CONVERT intenta conversiones válidas; ROW_NUMBER elige una versión por llave. El proxy de $4,920 está marcado. Reprocesar conservó cinco ventas en Oro.”
+> “TRIM limpia los espacios; ROW_NUMBER deja la versión POS-805 de las 19:30; TRY_CONVERT excluye POS-806 porque ‘muchas’ no es una cantidad. Reprocesar conservó cinco ventas en Oro.”
 
-**Demo (diapositiva 6):** ejecutar `02_etl_ingesta_bronce.sql`, luego `03_etl_limpieza_plata.sql`, y terminar con `04_vistas_gold_bi.sql`. Mostrar conteo Bronce, `oro.vw_Calidad_Integracion` y `oro.vw_Gold_Ventas_Vinos`. Pregunta de cierre: “¿Qué compró CLI-V01 y qué puntaje tenía el vino?” El archivo 01 se ejecuta antes para crear la base y sus tablas.
+**Demo (diapositiva 6):** mostrar la captura real de `sqlcmd` con SQL Server 2022, los conteos `7 → 6 → 5`, la versión 19:30 de POS-805 y el total de Oro. La base vacía y los cuatro archivos ya se ejecutaron mediante `./tasks/run-sqlserver-demo.sh`; la captura y el log están en `docs/`. No presentarlo como SSMS.
 
 ### Ximena — QA y límites
 
-> “La vista cuenta cinco ventas en Bronce y cinco en Oro, cero POS inválidas, cero clientes o vinos huérfanos y una venta anónima preservada. Los tres ratings son válidos. Son conteos de la muestra disponible.”
+> “La vista cuenta siete filas POS, seis IDs, un duplicado, una cantidad inválida y cinco ventas Oro. En ratings hay uno fuera de rango y tres válidos; no hay huérfanos y se conserva una venta anónima.”
 
 ### Joel — lectura de Oro y entregables
 
@@ -46,7 +46,7 @@ El banco oficial conserva a Ezequiel como Líder + BI y a Joel como Documentaci�
 ### Patricio García — ETL
 
 1. **¿Por qué conservar POS-804?** Es una venta válida aunque no se conoce al cliente; se asigna CLI-MOSTRADOR y se conservan los $450 sin inventar identidad.
-2. **¿Cómo evita duplicados al reejecutar?** La ingesta exacta no repite filas; `ROW_NUMBER()` elige por ID de venta y fecha; Oro actualiza/insert por llave. Se probó una versión tardía y Oro mantuvo cinco ventas.
+2. **¿Cómo evita duplicados al reejecutar?** La ingesta no repite la misma fila; `ROW_NUMBER()` elige por ID y fecha; Oro actualiza o inserta por llave. La muestra sintética parte de siete filas, pero conserva cinco ventas y no cambia los totales al reprocesar.
 
 ### José Hernández — Arquitectura
 
@@ -55,8 +55,8 @@ El banco oficial conserva a Ezequiel como Líder + BI y a Joel como Documentaci�
 
 ### Ximena Ibarra — QA
 
-1. **¿Qué anomalías revisan?** Nulos, duplicados, conversiones, cantidades/precios fuera de rango, huérfanos, categorías y ratings inválidos. La vista resume esos controles; hoy no hay POS inválidas ni huérfanos.
-2. **¿Qué hacen con un rating nulo o fuera de rango?** Se conserva en Bronce, se excluye de Plata/Oro y se cuenta como inválido. La escala válida es 0–100.
+1. **¿Qué anomalías revisan?** Nulos, duplicados, conversiones, cantidades/precios fuera de rango, huérfanos, categorías y ratings inválidos. La demo detecta un duplicado, una cantidad no convertible, un rating fuera de escala y cero huérfanos.
+2. **¿Qué hacen con un rating nulo o fuera de rango?** Se conserva en Bronce, se excluye de Plata/Oro y se cuenta como inválido. La escala válida es 0–100; el ejemplo 120 comprueba esta regla.
 
 ### Joel Ibarra — Documentación y Trello
 

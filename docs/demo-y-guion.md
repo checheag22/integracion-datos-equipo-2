@@ -32,21 +32,21 @@ La asignación de roles y nombres sigue el banco oficial. Para cinco integrantes
 
 ### 1–3 · Ezequiel — propósito, roles y alcance
 
-> “Somos el Equipo 2. Conectamos ventas POS, clientes del CRM y calificaciones de vinos en SQL Server para saber qué se vendió, por qué canal y con qué perfil. Viñedos del Alba es un nombre ficticio para este caso. La muestra tiene cinco ventas, cuatro clientes y tres vinos. No recibimos los archivos originales ni datos de inventario o venta web.”
+> “Somos el Equipo 2. Conectamos ventas POS, clientes del CRM y calificaciones de vinos en SQL Server para saber qué se vendió, por qué canal y con qué perfil. Viñedos del Alba es un nombre ficticio. La base de muestra tiene cinco ventas, cuatro clientes y tres vinos; agregamos tres filas sintéticas para demostrar cómo se limpian datos sucios. No recibimos archivos fuente, inventario ni ventas web.”
 
 En la diapositiva 2, indicar en una frase quién lleva Arquitectura, ETL, QA, Liderazgo/BI y Documentación/Trello. Los nombres y roles coinciden con el banco oficial.
 
 ### 4–5 · José — arquitectura y modelo
 
-> “Bronce conserva los valores como llegaron; Plata limpia y relaciona; Oro concentra las ventas y las vistas de consumo. En el hecho de ventas, la llave primaria identifica la transacción y las llaves foráneas conectan Cliente y Vino. Si falta el cliente, se conserva la venta bajo CLI-MOSTRADOR. La relación con Customer 360 no está implementada.”
+> “Bronce conserva los valores como llegaron; Plata limpia, escoge versiones y conecta cliente con vino; Oro publica las cinco ventas válidas y sus vistas. La llave primaria identifica la venta y dos llaves foráneas conectan Cliente y Vino. Si falta cliente, se conserva como CLI-MOSTRADOR.”
 
 ### 7–8 · Patricio — limpieza e idempotencia
 
-> “TRIM quita espacios, UPPER normaliza categorías y TRY_CONVERT convierte valores solo cuando son válidos. El gasto faltante de CLI-V02 usa un proxy de $4,920 derivado de POS y queda marcado como imputado. ROW_NUMBER escoge una versión por ID; repetir el proceso conserva cinco ventas en Oro.”
+> “En POS-805, TRIM quita los espacios y ROW_NUMBER elige la versión más reciente. En POS-806, TRY_CONVERT no puede convertir ‘muchas’ y la fila queda fuera de Oro. El puntaje 120 también queda fuera del rango. Repetir el proceso conserva cinco ventas en Oro.”
 
 ### 9 · Ximena — calidad
 
-> “La vista de calidad compara cinco registros POS en Bronce con cinco ventas en Oro. Hay cero filas POS inválidas, cero claves huérfanas y una venta anónima preservada. Los tres ratings son válidos y el gasto de un cliente está marcado como proxy. Estos conteos describen esta muestra, no sistemas completos.”
+> “La vista marca siete filas POS en Bronce, seis IDs, un duplicado, un dato inválido y cinco ventas Oro. Ratings: cuatro recibidos, uno fuera de rango, tres válidos. No hay huérfanos; una venta anónima se conserva. Son cifras de la muestra.”
 
 ### 10 · Joel + Ezequiel — lectura de Oro
 
@@ -56,14 +56,12 @@ En la diapositiva 2, indicar en una frase quién lleva Arquitectura, ETL, QA, Li
 
 ### 6 · Patricio — demostración real (2:30)
 
-Preparar SQL Server Management Studio (SSMS) con la base `DB_Vinicola_Integration` creada y los cuatro archivos del repositorio abiertos. La demostración muestra que la ingesta se puede volver a ejecutar, el procedimiento transforma los datos, la vista cuantifica calidad y Oro responde una pregunta. No hay que teclear los archivos durante la exposición.
+La corrida ya fue ejecutada en SQL Server 2022 desde una base vacía con `sqlcmd` y un contenedor temporal. La diapositiva 6 contiene captura real; el log íntegro está en `docs/evidencia-ejecucion-sqlserver-2026-11-23.txt`. No es SSMS. Si el equipo decide mostrar una corrida en otra computadora, puede abrir los cuatro archivos en SSMS y seguir el mismo orden.
 
-1. Ejecutar `02_etl_ingesta_bronce.sql`; mostrar que la muestra permanece en 5 filas de POS, sin agregar las mismas filas otra vez.
-2. Ejecutar `03_etl_limpieza_plata.sql`; explicar `TRIM`/`UPPER`, `TRY_CONVERT`, `ROW_NUMBER()` y la venta anónima.
-3. Ejecutar `04_vistas_gold_bi.sql`; mostrar `oro.vw_Calidad_Integracion` y `oro.vw_Gold_Ventas_Vinos`. Preguntar: “¿Qué compró CLI-V01 y qué puntaje tenía el vino?”
-4. Cerrar con Rioja: `$14,400` de ingresos, sin afirmar que el puntaje causó la venta.
-
-**Antes de la presentación:** probar estos tres pasos en la computadora e instancia que se usarán. La ejecución limpia de los cuatro scripts ya se verificó por separado y el log reciente está en `docs/evidencia-ejecucion-sqlserver-2026-11-23.txt`.
+1. En Bronce, enseñar el duplicado ` POS-805 ` y la cantidad inválida `muchas`.
+2. En Plata, explicar que queda la versión de las 19:30 y se excluye POS-806.
+3. En la vista de calidad, leer `7 → 6 → 5` y `4 → 3` para POS y ratings.
+4. En Oro, mostrar 5 ventas, 24 botellas y $22,760; preguntar: “¿Qué compró CLI-V01 y qué puntaje tenía el vino?”
 
 ### 11 · Ximena — límites
 
@@ -79,7 +77,7 @@ Preparar SQL Server Management Studio (SSMS) con la base `DB_Vinicola_Integratio
 
 ## Plan B
 
-El PDF ya lleva los conteos, el insight y las tres acciones de la demo. El log de ejecución guarda resultados reales obtenidos en SQL Server 2022 desde una base temporal limpia. No es una captura de SSMS; si el docente solicita una captura visual de esa interfaz, hay que generarla en la computadora de exposición y presentarla como respaldo.
+El PDF lleva la captura real de Terminal/`sqlcmd`, los conteos, el insight y las tres reglas de la demo. El log conserva resultados desde una base temporal limpia. Si preguntan, decir con claridad que fue SQL Server 2022 ejecutado con `sqlcmd`, no SSMS.
 
 ## Referencias rápidas
 

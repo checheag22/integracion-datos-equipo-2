@@ -15,14 +15,14 @@
 
 El proyecto consolida ventas de punto de venta (POS), clientes del CRM y calificaciones de vinos. El cruce se realiza mediante `ID_Cliente` y `SKU_Vino`. La muestra disponible contiene cinco transacciones POS, cuatro clientes CRM y tres vinos con ratings. No se recibieron datos de inventario ni órdenes de comercio electrónico; por tanto, el análisis no los atribuye al negocio.
 
-La muestra POS suma 24 botellas y $22,760 MXN. Una transacción con cliente nulo se conserva bajo `CLI-MOSTRADOR`. El gasto ausente de `CLI-V02` se completa con $4,920 MXN observados en la muestra POS y se marca `Gasto_Fue_Imputado=1`; no es un gasto anual confirmado.
+La muestra base tiene cinco ventas, cuatro clientes y tres vinos. Para cumplir la indicación reciente del profesor de mostrar entrada sucia, el script agrega dos filas POS sintéticas: una versión duplicada corregida con espacios y una cantidad no convertible. También añade un rating sintético fuera de escala. No se presentan como transacciones reales. La limpieza conserva las cinco ventas válidas, 24 botellas y $22,760 MXN. Una transacción sin cliente se conserva bajo `CLI-MOSTRADOR`. El gasto ausente de `CLI-V02` se completa con $4,920 MXN observados en la muestra POS y se marca `Gasto_Fue_Imputado=1`; no es un gasto anual confirmado.
 
 ## 2. Arquitectura de integración (SQL Server)
 
 ![Flujo de integración Medallón](assets/flujo_medallon_sql.png)
 
-- **Bronce (`bronce`):** conserva texto crudo de POS, CRM y ratings; permite rastrear filas repetidas y valores que no convierten.
-- **Plata (`plata`):** estandariza con `TRIM`/`UPPER`, convierte con `TRY_CONVERT`, resuelve duplicados por llave de negocio con `ROW_NUMBER()` y aplica reglas y claves.
+- **Bronce (`bronce`):** guarda el texto tal como llega, incluso espacios, una fila repetida y valores inválidos, para que se puedan revisar.
+- **Plata (`plata`):** limpia espacios/categorías, intenta convertir números, elige la versión más reciente por llave y forma las dimensiones de cliente y vino.
 - **Oro (`oro`):** concentra los hechos POS y expone vistas para análisis, calidad y KPIs.
 
 La ingesta de demostración usa datos de referencia incluidos en los scripts SQL y un objeto JSON de ejemplo. No recibimos los archivos fuente originales CSV, Excel o JSON; si el equipo los recupera, debe sustituir la muestra por esas fuentes.
@@ -52,7 +52,8 @@ assets/
 ├── fuente-punto-venta.png
 ├── clientes-vinicola.png
 ├── flujo-medallon-fotografico.png
-└── insight-de-negocio.png
+├── insight-de-negocio.png
+└── sqlserver_resultados.png
 docs/
 ├── presentacion-final-equipo-2.pptx / .pdf
 ├── avance.docx / .pdf
@@ -62,36 +63,39 @@ docs/
 ├── respuestas-banco-preguntas-por-rol.md
 ├── plan-b-resultados.md
 ├── evidencia-ejecucion-sqlserver-2026-11-23.txt
-└── guia-presentacion-proyecto-final.pdf
+├── guia-presentacion-proyecto-final.pdf
+├── captura-sqlserver-demo-2026-11-23.png
+└── estado-entregables.md
 tasks/
-└── generate_presentation.py
+├── generate_presentation.py
+└── run-sqlserver-demo.sh
 README.md
 ```
 
 1. `01_ddl_arquitectura_der.sql`: base de datos, esquemas, tablas, PK, FK y restricciones.
-2. `02_etl_ingesta_bronce.sql`: cargas de muestra SQL, CRM y JSON; evita reinsertar una fila idéntica.
+2. `02_etl_ingesta_bronce.sql`: carga la muestra base y tres ejemplos sintéticos sucios; evita reinsertar filas idénticas.
 3. `03_etl_limpieza_plata.sql`: siete procedimientos, conversiones, estandarización, deduplicación e integración idempotente.
 4. `04_vistas_gold_bi.sql`: cinco vistas Oro, KPIs y validaciones cuantitativas.
 
 El deck del avance previo se conserva en `docs/archivo-historico/`; la presentación final editable tiene 13 diapositivas, incluye la matriz de roles, notas del expositor y un plan de 25 minutos; su PDF está junto al PowerPoint. El guion por rol, las dos preguntas prioritarias por integrante y el Plan B están en `docs/demo-y-guion.md`, `docs/guion-rapido-por-integrante.md` y `docs/plan-b-resultados.md`.
-La guía de avance anterior también queda en `docs/archivo-historico/`; la guía que rige esta presentación está en `docs/guia-presentacion-proyecto-final.pdf`. Moodle pide 25–35 minutos. El guion usa 15 minutos de exposición/demo, 8 de preguntas y 2 de transiciones (25 minutos en total), en el extremo superior de la guía PDF.
+La guía de avance anterior también queda en `docs/archivo-historico/`; la guía que rige esta presentación está en `docs/guia-presentacion-proyecto-final.pdf`. Moodle pide 25–35 minutos; la guía PDF marca 20–25 minutos. El guion usa 15 minutos de exposición/demo, 8 de preguntas y 2 de transiciones (25 minutos en total).
 
 ### Ejecución
 
-En SQL Server 2022, abrir y ejecutar los cuatro archivos en orden (`01` → `04`) dentro de una instancia de práctica. Repetir el flujo es seguro para esta carga de demostración: no borra bases ni tablas, la ingesta exacta evita duplicados y la integración vuelve a procesar las llaves sin duplicar ventas Oro.
+En SQL Server 2022, ejecutar los cuatro archivos en orden (`01` → `04`) dentro de una instancia de práctica. Para una corrida aislada reproducible en macOS con Docker instalado, ejecutar `./tasks/run-sqlserver-demo.sh`; crea una instancia temporal sin puertos publicados y la elimina al cerrar la sesión. No ejecutar sobre una instancia con políticas que impidan crear `DB_Vinicola_Integration`.
 
 La carga actual utiliza `INSERT` y `OPENJSON`; no usa `BULK INSERT` porque los archivos originales no se incluyeron. No ejecutar sobre una instancia con políticas que impidan crear `DB_Vinicola_Integration`.
 
 ### Calidad y resultados reproducibles
 
-- POS: 5 filas crudas, 5 IDs únicos, 5 ventas Oro; 0 filas inválidas, 0 huérfanos y 1 cliente nulo preservado como anónimo.
+- POS: 7 filas Bronce, 6 IDs únicos, 1 versión anterior descartada, 1 cantidad inválida excluida y 5 ventas Oro; 0 huérfanos y 1 cliente nulo preservado como anónimo.
 - CRM: 4 filas / 4 IDs únicos; 1 gasto imputado como proxy observado.
-- Ratings: 3 filas / 3 vinos válidos.
+- Ratings: 4 filas Bronce / 3 vinos válidos; el puntaje sintético de 120 se excluye por exceder el rango 0–100.
 - Oro: 24 botellas; ingresos de $22,760 MXN; venta anónima de $450 MXN.
 - Platinum: 12 de 15 botellas (80%) corresponden a vino con puntaje >93; las 12 pertenecen a una sola persona en esta muestra.
 - Origen: Rioja 12 botellas (50%), Mendoza 8 (33.33%) y Valle de Guadalupe 4 (16.67%).
 
-La muestra no tiene filas duplicadas. La deduplicación se comprobó en SQL Server 2022 desechable insertando una versión posterior de POS-805; Oro conservó cinco ventas y eligió la fecha más reciente. Los cuatro scripts se ejecutaron dos veces desde una base vacía y mantuvieron los conteos. En otra prueba consulté las cinco vistas y ejecuté los siete procedimientos. La consola real está en `docs/evidencia-ejecucion-sqlserver-2026-11-23.txt`; es salida de `sqlcmd`, no captura de SSMS.
+Las anomalías sintéticas son visibles en Bronce y explicadas por sus resultados: `POS-805` con espacios y versión posterior gana por fecha; `POS-806` contiene `muchas` y no convierte a cantidad; el rating 120 se rechaza. La vista de calidad muestra 7→6→5 para las ventas POS y 4→3 para ratings válidos. Los cuatro scripts se ejecutaron desde una base vacía en SQL Server 2022 y la reejecución mantuvo 5 ventas, 24 botellas y $22,760 MXN. Se consultaron las cinco vistas y siete procedimientos. La consola se capturó como imagen en `docs/captura-sqlserver-demo-2026-11-23.png` y su salida íntegra está en `docs/evidencia-ejecucion-sqlserver-2026-11-23.txt`; ambas evidencias provienen de `sqlcmd` contra SQL Server 2022, no de SSMS.
 
 ## 5. Integrantes y roles (cinco personas)
 

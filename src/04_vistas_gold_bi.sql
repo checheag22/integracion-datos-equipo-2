@@ -76,6 +76,11 @@ IF (SELECT SUM(Botellas_Vendidas) FROM oro.Fact_Ventas_POS)<>24 THROW 50102,'QA:
 IF (SELECT SUM(Total_Venta_MXN) FROM oro.Fact_Ventas_POS)<>22760 THROW 50103,'QA: ingresos distintos a 22,760 MXN.',1;
 IF (SELECT COUNT(*) FROM oro.Fact_Ventas_POS WHERE ID_Cliente='CLI-MOSTRADOR')<>1 THROW 50104,'QA: no se preservó la venta anónima.',1;
 IF (SELECT Gasto_Acumulado_Anual FROM plata.Dim_Clientes WHERE ID_Cliente='CLI-V02')<>4920 THROW 50105,'QA: proxy de CLI-V02 distinto a 4,920 MXN.',1;
+IF (SELECT COUNT(*) FROM bronce.Ventas_POS_Tienda)<>7 THROW 50106,'QA: se esperan 7 filas POS Bronce, incluida la demo sintética.',1;
+IF (SELECT COUNT(*) FROM bronce.Staging_Ratings)<>4 THROW 50107,'QA: se esperan 4 ratings Bronce, incluido el inválido sintético.',1;
+IF (SELECT POS_Duplicados_Descartables FROM oro.vw_Calidad_Integracion)<>1 THROW 50108,'QA: el duplicado sintético no fue detectado.',1;
+IF (SELECT POS_Filas_Invalidas_Bronce FROM oro.vw_Calidad_Integracion)<>1 THROW 50109,'QA: la cantidad POS inválida no fue detectada.',1;
+IF (SELECT Ratings_Filas_Invalidas_Bronce FROM oro.vw_Calidad_Integracion)<>1 THROW 50110,'QA: el rating fuera de rango no fue detectado.',1;
 GO
 SELECT * FROM oro.vw_Calidad_Integracion;
 SELECT * FROM oro.vw_Gold_Ventas_Vinos ORDER BY ID_Venta_POS;

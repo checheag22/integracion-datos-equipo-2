@@ -282,3 +282,22 @@ GO
 /* Primera ejecución ETL: al volver a ejecutar el archivo no agrega duplicados. */
 EXEC plata.usp_ProcesarPlata;
 GO
+/* Inspección posterior: la versión más nueva gana y los errores quedan visibles. */
+WITH POSInspeccion AS (
+    SELECT p.*,
+           ROW_NUMBER() OVER (PARTITION BY NULLIF(TRIM(p.ID_Venta_POS),N'')
+                              ORDER BY TRY_CONVERT(DATETIME2(0),TRIM(p.Fecha_Hora),126) DESC,
+                                       p.POS_Row_ID DESC) AS rn
+    FROM bronce.Ventas_POS_Tienda p
+    WHERE TRIM(p.ID_Venta_POS) IN (N'POS-805',N'POS-806')
+)
+SELECT p.POS_Row_ID,p.ID_Venta_POS,p.Fecha_Hora,p.Botellas_Vendidas,
+       CASE WHEN TRY_CONVERT(INT,TRIM(p.Botellas_Vendidas)) IS NULL
+                 OR TRY_CONVERT(INT,TRIM(p.Botellas_Vendidas))<=0 THEN N'Excluida: cantidad inválida'
+            WHEN p.rn>1 THEN N'Descartada: versión duplicada anterior'
+            WHEN f.ID_Venta_POS IS NOT NULL THEN N'Integrada: versión más reciente'
+            ELSE N'Excluida: revisar relaciones o campos' END AS Resultado
+FROM POSInspeccion p
+LEFT JOIN oro.Fact_Ventas_POS f ON f.ID_Venta_POS=TRIM(p.ID_Venta_POS)
+ORDER BY p.POS_Row_ID;
+GO

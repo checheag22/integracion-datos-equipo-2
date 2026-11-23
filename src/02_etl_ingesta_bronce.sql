@@ -1,6 +1,8 @@
-/* 02 | Ingesta reproducible del conjunto de demostración disponible.
-   Las fuentes originales no se entregaron como archivos; esta muestra se
-   conserva aquí como SQL/CSV/JSON de referencia. Inserts exactos idempotentes. */
+/* 02 | Ingesta reproducible de la muestra de demostración.
+   Las fuentes originales no se entregaron como archivos. Los registros POS-805
+   (repetido/corregido) y POS-806 (cantidad inválida), más un rating fuera de
+   escala, son datos sintéticos añadidos para demostrar limpieza en clase.
+   No representan transacciones reales. Inserts exactos idempotentes. */
 USE DB_Vinicola_Integration;
 GO
 SET ANSI_NULLS ON;
@@ -17,7 +19,9 @@ FROM (VALUES
     (N'POS-802',N'2026-08-01T15:40:00',N'CLI-V02',N'VIN-MAL-02',N'Boutique',N'6',N'820.00'),
     (N'POS-803',N'2026-08-02T18:20:00',N'CLI-V01',N'VIN-TEM-03',N'Cata Presencial',N'12',N'1200.00'),
     (N'POS-804',N'2026-08-03T11:00:00',NULL,N'VIN-CAB-01',N'Boutique',N'1',N'450.00'),
-    (N'POS-805',N'2026-08-03T19:15:00',N'CLI-V03',N'VIN-MAL-02',N'Boutique',N'2',N'820.00')
+    (N'POS-805',N'2026-08-03T19:15:00',N'CLI-V03',N'VIN-MAL-02',N'Boutique',N'2',N'820.00'),
+    (N' POS-805 ',N'2026-08-03T19:30:00',N' CLI-V03 ',N' VIN-MAL-02 ',N' Boutique ',N' 2 ',N'820.00'),
+    (N'POS-806',N'2026-08-03T20:00:00',N'CLI-V03',N'VIN-MAL-02',N'Boutique',N'muchas',N'820.00')
 ) s(ID_Venta_POS,Fecha_Hora,ID_Cliente,SKU_Vino,Canal_Venta,Botellas_Vendidas,Precio_Unitario_MXN)
 WHERE NOT EXISTS (
     SELECT 1 FROM bronce.Ventas_POS_Tienda t
@@ -48,7 +52,8 @@ WHERE NOT EXISTS (
 DECLARE @RatingsJson NVARCHAR(MAX)=N'[
  {"SKU_Vino":"VIN-CAB-01","Nombre_Etiqueta":"Reserva Cabernet Sauvignon 2020","Puntaje_Guia_Peñin_Vivino":91.5,"Maridaje_Sugerido":"Cortes de Carne","Cepa_Origen":"Valle de Guadalupe, México"},
  {"SKU_Vino":"VIN-MAL-02","Nombre_Etiqueta":"Gran Reserva Malbec 2018","Puntaje_Guia_Peñin_Vivino":95.0,"Maridaje_Sugerido":"Quesos Madurados","Cepa_Origen":"Mendoza, Argentina"},
- {"SKU_Vino":"VIN-TEM-03","Nombre_Etiqueta":"Edición Especial Tempranillo 2019","Puntaje_Guia_Peñin_Vivino":93.8,"Maridaje_Sugerido":"Pastas y Cordero","Cepa_Origen":"Rioja, España"}
+ {"SKU_Vino":"VIN-TEM-03","Nombre_Etiqueta":"Edición Especial Tempranillo 2019","Puntaje_Guia_Peñin_Vivino":93.8,"Maridaje_Sugerido":"Pastas y Cordero","Cepa_Origen":"Rioja, España"},
+ {"SKU_Vino":"VIN-DEMO-INVALIDO","Nombre_Etiqueta":"Registro sintético fuera de escala","Puntaje_Guia_Peñin_Vivino":120,"Maridaje_Sugerido":"Sin validar","Cepa_Origen":"Ejemplo didáctico"}
 ]';
 WITH Parsed AS (
     SELECT SKU_Vino,Nombre_Etiqueta,Puntaje,Maridaje_Sugerido,Cepa_Origen
@@ -75,4 +80,13 @@ GO
 SELECT N'Bronce POS' AS Fuente, COUNT(*) AS Filas FROM bronce.Ventas_POS_Tienda
 UNION ALL SELECT N'Bronce CRM', COUNT(*) FROM bronce.Staging_CRM
 UNION ALL SELECT N'Bronce Ratings', COUNT(*) FROM bronce.Staging_Ratings;
+GO
+/* Inspección previa: filas sucias visibles antes de aplicar las reglas. */
+SELECT ID_Venta_POS,Fecha_Hora,ID_Cliente,SKU_Vino,Canal_Venta,Botellas_Vendidas,Precio_Unitario_MXN
+FROM bronce.Ventas_POS_Tienda
+WHERE TRIM(ID_Venta_POS) IN (N'POS-805',N'POS-806')
+ORDER BY POS_Row_ID;
+SELECT SKU_Vino,Puntaje_Guia_Penin_Vivino
+FROM bronce.Staging_Ratings
+WHERE SKU_Vino=N'VIN-DEMO-INVALIDO';
 GO

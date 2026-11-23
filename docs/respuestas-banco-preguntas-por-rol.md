@@ -39,7 +39,7 @@ No está implementado en esta entrega. El modelo actual integra POS, CRM y ratin
 
 ### 1. PRIORIDAD — ¿Qué otras anomalías revisar antes de aceptar la carga?
 
-Además de nulos, revisaría llaves duplicadas, fechas no convertibles, botellas no positivas, precios negativos, clientes o SKUs huérfanos, puntuaciones fuera del rango 0–100, categorías fuera de catálogo y campos de texto vacíos o con espacios. El SQL incluye controles de conversión, duplicados, huérfanos, puntuaciones y restricciones en Oro; en la muestra actual registra cero filas POS inválidas y conserva una venta anónima.
+Además de nulos, revisaría llaves duplicadas, fechas no convertibles, botellas no positivas, precios negativos, clientes o SKUs huérfanos, puntuaciones fuera del rango 0–100, categorías fuera de catálogo y campos de texto vacíos o con espacios. En esta demo, de siete filas POS Bronce quedan seis IDs únicos: se descarta una versión anterior duplicada, se excluye POS-806 porque `muchas` no convierte a cantidad y Oro conserva cinco ventas válidas. También se excluye un rating sintético de 120 y se conserva una venta anónima.
 
 ### 2. Respaldo — ¿Cómo afectan las descripciones faltantes del diccionario?
 

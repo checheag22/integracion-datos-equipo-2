@@ -43,7 +43,7 @@ def make_medallion_asset():
     headings = ["BRONCE", "PLATA", "ORO"]
     titles = ["Entrada conservada", "Reglas y relaciones", "Consulta para decidir"]
     details = [
-        ["Ventas POS · CRM · ratings", "Muestra incluida en scripts SQL", "OPENJSON para ratings de ejemplo", "Texto crudo y trazable"],
+        ["7 ventas POS en Bronce", "4 ratings; uno fuera de escala", "Dos ejemplos POS sintéticos", "Texto crudo y trazable"],
         ["TRIM · UPPER · TRY_CONVERT", "ROW_NUMBER por llave natural", "Dim_Clientes · Dim_Vinos", "Validación de rangos y llaves"],
         ["Fact_Ventas_POS", "5 vistas de calidad y BI", "5 ventas · 24 botellas", "$22,760 MXN observados"],
     ]
@@ -65,6 +65,15 @@ def make_medallion_asset():
         d.polygon([(x + 48, 449), (x + 78, 466), (x + 48, 483)], fill="#BE9856")
     d.text((82, 780), "Alcance: muestra de SQL; sin archivos originales, inventario ni órdenes web.", font=font(22, True), fill="#26312C")
     im.save(ASSETS / "flujo_medallon_sql.png", optimize=True)
+
+
+def make_sqlserver_evidence_crop():
+    """Crop the actual Terminal capture for legibility; retain the full capture in docs/."""
+    source = ROOT / "docs" / "captura-sqlserver-demo-2026-11-23.png"
+    if not source.exists():
+        raise FileNotFoundError(f"Falta evidencia real de SQL Server: {source}")
+    with Image.open(source) as im:
+        im.crop((0, 1278, 900, 1584)).save(ASSETS / "sqlserver_resultados.png", optimize=True)
 
 
 def add_rect(slide, x, y, w, h, fill, radius=True, line=None, transparency=0):
@@ -153,6 +162,7 @@ def note(slide, minutes, script, cue):
 
 
 make_medallion_asset()
+make_sqlserver_evidence_crop()
 prs = Presentation()
 prs.slide_width, prs.slide_height = Inches(W), Inches(H)
 blank = prs.slide_layouts[6]
@@ -164,7 +174,7 @@ add_photo(s, "portada-vinicola-golden-hour.png", 0, 0, 5.15, H, focus=(0.43, 0.5
 add_rect(s, 5.15, 0, W - 5.15, H, GREEN, radius=False)
 add_photo(s, "logo_negocio.png", 11.95, 0.45, 0.7, 0.82)
 add_text(s, 5.8, 0.62, 5.6, 0.25, "PROYECTO INTEGRADOR · SQL SERVER", 10, "D7B879", True)
-add_text(s, 5.8, 1.24, 6.5, 1.35, "De datos dispersos\na una respuesta clara", 31, WHITE, True, face="Georgia")
+add_text(s, 5.8, 1.24, 6.5, 1.35, "De cada registro\na una venta confiable", 31, WHITE, True, face="Georgia")
 add_text(s, 5.85, 2.86, 6.35, 0.62, "Integramos ventas, clientes y calificaciones para entender qué se vende y a quién.", 17, "F2EDE4")
 add_rect(s, 5.85, 3.7, 3.42, 0.42, "2B5548")
 add_text(s, 5.95, 3.78, 3.22, 0.22, "VIÑEDOS DEL ALBA · CASO FICTICIO", 9, WHITE, True, align=PP_ALIGN.CENTER)
@@ -214,9 +224,9 @@ for i, (img, label, metric, detail, focus) in enumerate(cards):
     add_text(s, x + 0.2, 4.26, 3.4, 0.5, metric, 23, GREEN, True, face="Georgia")
     add_text(s, x + 0.2, 4.88, 3.38, 0.29, detail, 11, MUTED)
 add_rect(s, 0.62, 5.79, 12.06, 0.79, PALE_GOLD)
-add_text(s, 0.86, 5.98, 11.5, 0.42, "Alcance honesto: la muestra viene dentro de scripts SQL; no recibimos archivos POS/CRM/rating, inventario ni ventas web.", 12, INK, True, valign=MSO_ANCHOR.MIDDLE)
+add_text(s, 0.86, 5.93, 11.5, 0.58, "Base: 5 ventas. Para mostrar limpieza agregamos 2 filas POS y 1 rating sintéticos. No recibimos los archivos fuente ni datos de inventario o venta web.", 11, INK, True, valign=MSO_ANCHOR.MIDDLE)
 footer(s, 3, total)
-note(s, 1.0, "La pregunta analítica es sencilla: al conectar ventas, clientes y ratings podemos saber qué vino se vendió, por qué canal y a qué segmento. La muestra tiene cinco transacciones, cuatro clientes y tres vinos. No recibimos archivos originales ni datos de inventario o de venta web; por eso nuestro resultado describe únicamente esta muestra.", "Lo que presentamos es verificable, pero pequeño y basado en datos de ejemplo cargados desde SQL.")
+note(s, 1.0, "La pregunta analítica es sencilla: al conectar ventas, clientes y ratings podemos saber qué vino se vendió, por qué canal y a qué segmento. La base de demostración parte de cinco transacciones, cuatro clientes y tres vinos. Por indicación del profesor agregamos dos filas POS y un rating sintéticos para que se vea la limpieza. No recibimos los archivos originales ni datos de inventario o de venta web.", "Decimos claramente qué es muestra base y qué filas se añadieron solo para enseñar reglas.")
 
 # 4 · Arquitectura Medallion con el asset requerido y corregido.
 s = new_slide(prs)
@@ -232,15 +242,16 @@ add_photo(s, "diagrama_der_sqlserver.png", 1.22, 1.9, 10.89, 5.1)
 footer(s, 5, total)
 note(s, 1.25, "El hecho Fact_Ventas_POS tiene como llave primaria el ID de venta. Sus llaves foráneas apuntan a las dimensiones de cliente y vino. Usamos VARCHAR para IDs, DATETIME2 para la fecha, DECIMAL para importes y puntajes e INT para botellas. La venta anónima se liga a CLI-MOSTRADOR para conservar el ingreso sin inventar una identidad.", "Las líneas entre el hecho Oro y las dimensiones Plata son FKs físicas; la zona de Bronce se transforma por ETL.")
 
-# 6 · Demo desde SSMS, tres acciones claras y Plan B.
+# 6 · Evidencia real en SQL Server, no un mockup.
 s = new_slide(prs, GREEN)
-add_photo(s, "fuente-punto-venta.png", 7.65, 0, W - 7.65, H, focus=(0.5, 0.5))
-add_rect(s, 0, 0, 7.72, H, GREEN, radius=False)
-heading(s, "04 · Corrida en vivo · 2–3 min", "Tres pasos; una pregunta", "Patricio comparte SQL Server Management Studio.", dark=True)
+add_photo(s, "sqlserver_resultados.png", 6.7, 2.24, 6.0, 2.04)
+add_text(s, 6.72, 4.58, 6.0, 0.35, "4 scripts SQL · 5 vistas · 7 procedimientos · reejecución sin cambio", 10, "D7B879", True)
+add_rect(s, 0, 0, 6.55, H, GREEN, radius=False)
+heading(s, "04 · Corrida real · 2–3 min", "SQL Server desde cero", "Patricio muestra la consola `sqlcmd` y el resultado.", dark=True)
 steps = [
-    ("01", "Ingesta", "Ejecutar 02 y contar POS en Bronce."),
-    ("02", "Transformación + regla", "Ejecutar 03; revisar 5 ventas y la venta anónima."),
-    ("03", "Oro + negocio", "Ejecutar 04; abrir Vista Gold y leer Rioja."),
+    ("01", "Bronce", "7 filas de entrada, incluidos ejemplos sucios."),
+    ("02", "Plata", "Normaliza, elige la versión vigente y excluye errores."),
+    ("03", "Oro", "5 ventas válidas; reejecutar no las duplica."),
 ]
 for i, (num, title, desc) in enumerate(steps):
     y = 2.0 + i * 1.08
@@ -248,10 +259,10 @@ for i, (num, title, desc) in enumerate(steps):
     add_text(s, 0.68, y + 0.09, 0.52, 0.29, num, 13, GREEN, True, align=PP_ALIGN.CENTER)
     add_text(s, 1.43, y - 0.02, 5.8, 0.3, title, 15, WHITE, True)
     add_text(s, 1.45, y + 0.35, 5.8, 0.43, desc, 11, "E4DED2")
-add_rect(s, 0.68, 5.44, 6.2, 0.98, "294D43")
-add_text(s, 0.92, 5.61, 5.72, 0.61, "Plan B local: salida real del 23-nov-2026 en docs/evidencia-ejecucion-sqlserver-2026-11-23.txt y resumen en docs/plan-b-resultados.md.", 10, WHITE, True)
+add_rect(s, 0.68, 5.44, 5.15, 0.98, "294D43")
+add_text(s, 0.92, 5.61, 4.68, 0.61, "La captura y la salida son reales. Corrió en SQL Server 2022 temporal con Docker; no es SSMS.", 10, WHITE, True)
 footer(s, 6, total)
-note(s, 2.5, "La base y las tablas se dejan preparadas antes de iniciar. En vivo reejecutamos la ingesta para ver que no duplica, corremos el procedimiento de Plata y abrimos la validación de calidad y la Vista Gold. Cerramos preguntando: qué compró CLI-V01 y qué puntaje tenía el vino. Si falla la conexión, usamos el resultado real local, decimos que es respaldo y no lo llamamos captura SSMS.", "No leer código: mostrar el antes, la regla y el resultado.")
+note(s, 2.5, "La captura viene de una corrida real que ejecuté desde una base vacía en SQL Server 2022 Developer, usando sqlcmd dentro de un contenedor temporal. El script crea la base, ejecuta los cuatro SQL, consulta calidad, ventas, Rioja y reejecución. No es una interfaz SSMS ni una imagen simulada. Para mostrarlo en clase, abran los cuatro SQL en SSMS y sigan el mismo orden; esta captura es el respaldo verificado.", "Primero mostrar que corre; luego leer solo tres conteos y una venta.")
 
 
 # 7 · Antes y después sencillo.
@@ -260,9 +271,9 @@ add_photo(s, "bodega-barricas.png", 7.5, 0, W - 7.5, H, focus=(0.67, 0.5))
 add_rect(s, 0, 0, 7.55, H, GREEN, radius=False)
 heading(s, "05 · Limpieza", "El dato cambia con una regla visible", "Un ejemplo por transformación. No hace falta leer todo el procedimiento.", dark=True)
 examples = [
-    ("' Gold '", "TRIM + UPPER", "GOLD", "Categoría normalizada"),
-    ("fecha como texto", "TRY_CONVERT", "DATETIME2", "Solo integra si convierte"),
-    ("gasto CRM vacío", "COALESCE + marca", "$4,920*", "Proxy observado en POS"),
+    ("' POS-805 '", "TRIM + ROW_NUMBER", "19:30", "Gana la versión más nueva"),
+    ("cantidad: muchas", "TRY_CONVERT", "NULL", "POS-806 queda fuera de Oro"),
+    ("rating: 120", "regla 0–100", "Excluido", "El registro sigue visible en Bronce"),
 ]
 for i, (before, rule, after, why) in enumerate(examples):
     y = 2.0 + i * 1.14
@@ -271,9 +282,9 @@ for i, (before, rule, after, why) in enumerate(examples):
     add_text(s, 2.3, y + 0.16, 1.45, 0.25, rule, 10, "D7B879", True, align=PP_ALIGN.CENTER)
     add_text(s, 3.87, y + 0.12, 1.35, 0.3, after, 15, WHITE, True, face="Georgia", align=PP_ALIGN.CENTER)
     add_text(s, 5.14, y + 0.15, 1.45, 0.43, why, 9, "E2DDD4")
-add_text(s, 0.84, 5.75, 5.95, 0.66, "* Imputación marcada; no equivale a gasto anual confirmado. La venta POS se conserva aunque no tenga cliente.", 11, WHITE, True)
+add_text(s, 0.84, 5.75, 5.95, 0.66, "También: ' Gold ' se normaliza y el gasto faltante se marca como proxy, no como dato confirmado.", 11, WHITE, True)
 footer(s, 7, total)
-note(s, 1.25, "En lugar de explicar cada línea, veamos tres ejemplos. TRIM y UPPER limpian la membresía. TRY_CONVERT intenta convertir fechas, cantidades, precios y calificaciones sin disfrazar errores. Cuando falta el gasto en CRM, se calcula un proxy de cuatro mil novecientos veinte pesos usando la muestra POS y se deja marcado como imputado. La venta sin cliente se conserva como mostrador.", "Un dato imputado se identifica; no se presenta como valor original.")
+note(s, 1.25, "Veamos la fila sucia. La segunda POS-805 trae espacios y una hora posterior. TRIM permite reconocer la misma llave y ROW_NUMBER deja una sola versión: la más reciente, a las 19:30. POS-806 trae la palabra muchas donde debería ir un entero; TRY_CONVERT devuelve NULL y la venta se excluye. Un rating de 120 también se excluye por estar fuera de 0 a 100. En Bronce los tres siguen visibles para explicar el porqué.", "Una regla por anomalía: limpiar, escoger o excluir; nunca esconder el valor original.")
 
 # 8 · Reejecución y deduplicación demostradas.
 s = new_slide(prs)
@@ -281,36 +292,34 @@ heading(s, "05 · Idempotencia", "Repetir el proceso no multiplica las ventas", 
 add_photo(s, "insight-de-negocio.png", 0.62, 1.85, 4.0, 4.74, focus=(0.7, 0.5))
 add_rect(s, 4.95, 1.92, 7.7, 1.52, PAPER, line="E6DED2")
 add_text(s, 5.25, 2.12, 7.1, 0.28, "PRUEBA DESDE CERO · SQL SERVER 2022", 10, BURGUNDY, True)
-add_text(s, 5.25, 2.53, 7.0, 0.52, "5 filas Bronce  →  5 IDs únicos  →  5 ventas Oro", 20, GREEN, True, face="Georgia")
+add_text(s, 5.25, 2.53, 7.0, 0.52, "7 filas Bronce  →  6 IDs  →  5 ventas Oro", 20, GREEN, True, face="Georgia")
 add_rect(s, 4.95, 3.77, 7.7, 1.46, PALE_GREEN)
 add_text(s, 5.25, 3.97, 7.05, 0.3, "PRUEBA DE DUPLICADO TARDÍO", 10, GREEN, True)
-add_text(s, 5.25, 4.36, 7.05, 0.65, "Agregamos una versión posterior de POS-805 en el entorno desechable; Oro siguió con 5 ventas y conservó la fecha más reciente.", 13, INK, True)
+add_text(s, 5.25, 4.36, 7.05, 0.65, "El duplicado con espacios queda en Bronce; Plata elige 19:30. POS-806 se excluye porque 'muchas' no es un entero.", 13, INK, True)
 add_rect(s, 4.95, 5.55, 7.7, 0.74, PALE_GOLD)
-add_text(s, 5.2, 5.72, 7.18, 0.4, "En la muestra oficial: 0 duplicados. La prueba sintética no se guarda en la base entregada.", 11, INK, True, valign=MSO_ANCHOR.MIDDLE)
+add_text(s, 5.2, 5.72, 7.18, 0.4, "Rerun: 5 ventas · 24 botellas · $22,760; el bloque de demo es sintético y está identificado.", 11, INK, True, valign=MSO_ANCHOR.MIDDLE)
 footer(s, 8, total)
-note(s, 1.0, "En la muestra real no hay duplicados. Para probar el caso límite, en un SQL Server temporal agregué una segunda versión de POS-805 con una fecha posterior, reprocesé y comprobé que Oro quedó con cinco transacciones y eligió la versión nueva. Repetir los cuatro scripts también mantuvo cinco ventas. La prueba sintética quedó en el contenedor que eliminé, no en el repositorio.", "La deduplicación se prueba con ROW_NUMBER; la PK por sí sola solo impide la llave repetida.")
+note(s, 1.0, "La muestra base tiene cinco ventas. La instrucción reciente pide enseñar datos sucios; por eso el archivo de ingesta agrega una corrección duplicada y dos valores inválidos sintéticos. El flujo reporta siete filas, seis IDs, un duplicado y una fila inválida; Oro publica cinco ventas. Reprocesar mantiene cinco ventas, 24 botellas y $22,760. Es una prueba reproducible, no una transacción real.", "Bronce guarda siete; Oro publica cinco válidas; rerun no las multiplica.")
 
 # 9 · Calidad con números legibles.
 s = new_slide(prs)
-heading(s, "06 · Calidad y control", "¿Qué pasó con los registros?", "Conteos reproducidos desde la vista oro.vw_Calidad_Integracion.")
-metrics = [
-    ("5 → 5", "POS Bronce → Oro", "Todas válidas en la muestra", GREEN),
-    ("0", "Filas POS inválidas", "Conversiones y rangos", BURGUNDY),
-    ("0", "Clientes / vinos huérfanos", "FK y cruces verificados", GREEN),
-    ("1", "Venta anónima", "Conservada como mostrador", GOLD),
-    ("4 / 4", "Clientes CRM", "1 gasto proxy identificado", GREEN2),
-    ("3 / 3", "Ratings válidos", "Puntajes dentro de rango", BURGUNDY),
+heading(s, "06 · Calidad y control", "La vista responde si el flujo fue limpio", "La salida de oro.vw_Calidad_Integracion, en cuatro lecturas.")
+quality = [
+    ("POS", "7 Bronce · 6 IDs · 1 duplicado · 1 inválida", "5 ventas Oro · 24 botellas · $22,760 MXN", BURGUNDY),
+    ("Ratings", "4 en Bronce · 1 fuera de escala", "3 vinos válidos en Plata · rango permitido: 0–100", GREEN),
+    ("CRM", "4 clientes · 1 gasto faltante", "$4,920 proxy marcado · no es gasto anual confirmado", GOLD),
+    ("Relaciones", "0 clientes huérfanos · 0 vinos huérfanos", "1 venta anónima preservada como CLI-MOSTRADOR", GREEN2),
 ]
-for i, (value, label, detail, tone) in enumerate(metrics):
-    col, row = i % 3, i // 3
-    x, y = 0.62 + col * 4.08, 2.0 + row * 1.77
-    add_rect(s, x, y, 3.82, 1.48, PAPER, line="E7DFD2")
-    add_text(s, x + 0.2, y + 0.12, 3.35, 0.49, value, 24, tone, True, face="Georgia")
-    add_text(s, x + 0.21, y + 0.67, 3.35, 0.25, label, 11, INK, True)
-    add_text(s, x + 0.21, y + 1.03, 3.35, 0.28, detail, 9, MUTED)
-add_text(s, 0.7, 5.84, 12, 0.55, "CHECK: puntaje 0–100 · botellas >0 · precio ≥0. Los conteos describen esta muestra pequeña, no las fuentes completas.", 11, INK, True)
+for i, (label, main, detail, tone) in enumerate(quality):
+    y = 2.0 + i * 1.02
+    add_rect(s, 0.75, y, 11.85, 0.82, PAPER, line="E7DFD2")
+    add_rect(s, 0.75, y, 1.55, 0.82, tone, radius=False)
+    add_text(s, 0.88, y + 0.22, 1.29, 0.32, label, 12, WHITE, True, align=PP_ALIGN.CENTER)
+    add_text(s, 2.55, y + 0.13, 9.7, 0.27, main, 13, INK, True)
+    add_text(s, 2.55, y + 0.48, 9.7, 0.22, detail, 10, MUTED)
+add_text(s, 0.8, 6.36, 11.8, 0.35, "Conteos comprobados en SQL Server; aplican a la muestra, no a fuentes completas del negocio.", 11, INK, True)
 footer(s, 9, total)
-note(s, 1.5, "La vista de calidad muestra cinco filas POS en Bronce y cinco ventas en Oro. No hubo conversiones inválidas, duplicados ni llaves huérfanas. La transacción anónima se conservó. En CRM hay cuatro clientes únicos y un gasto proxy; los tres ratings son válidos. CHECK valida rangos de puntaje, cantidad de botellas y precio. Es una comprobación de esta muestra, no de datos que no recibimos.", "Bronce y Oro se comparan con números; los filtros y CHECK protegen el destino.")
+note(s, 1.5, "Ximena lee cuatro resultados de la vista de calidad. En POS hubo siete filas de entrada, un ID repetido, una cantidad inválida y cinco ventas válidas; no faltan clientes ni vinos y una venta anónima se conserva. Ratings tiene una fila fuera de rango. CRM tiene un proxy explícitamente marcado. Estos resultados describen solo esta muestra.", "La vista hace visible lo que entró, lo que se corrigió y lo que llegó a Oro.")
 
 # 10 · Insight de negocio, limitación estadística visible.
 s = new_slide(prs)
@@ -356,8 +365,8 @@ heading(s, "08 · Entrega", "Código, visuales y defensa en un solo lugar", "Abr
 deliveries = [
     ("src/", "4 scripts SQL · orden 01 → 04"),
     ("assets/", "logo, flujo Medallón, DER y fotos"),
-    ("docs/", "PPT/PDF, guion, Q&A, Plan B y evidencia"),
-    ("README.md", "alcance, ejecución y límites"),
+    ("docs/", "PPT/PDF, guion, Q&A, log y captura SQL real"),
+    ("tasks/", "corrida limpia y reproducible con Docker"),
 ]
 for i, (name, desc) in enumerate(deliveries):
     y = 2.0 + i * 0.71
@@ -366,7 +375,7 @@ for i, (name, desc) in enumerate(deliveries):
 add_rect(s, 0.72, 5.15, 6.18, 1.25, "294D43")
 add_text(s, 0.95, 5.34, 5.72, 0.85, "GitHub Desktop: mostrar el clon y la rama local; abrir src/, assets/ y README. Moodle: abre 24-nov 11:00; cierra 26-nov 15:00.", 11, WHITE, True, valign=MSO_ANCHOR.MIDDLE)
 footer(s, 12, total)
-note(s, 1.0, "Abrimos GitHub Desktop y enseñamos el repositorio clonado en local, la rama de entrega, las carpetas src y assets y el README. Después mostramos el tablero privado de Trello. En docs están el PowerPoint editable, el PDF, los guiones, las respuestas y los resultados de Plan B. La tarea de Moodle tiene una ventana definida; la entrega aún es una acción separada.", "La estructura visible coincide con la carpeta publicada en la rama de entrega.")
+note(s, 1.0, "Mostramos el repositorio: los cuatro SQL, la carpeta de imágenes, los documentos y la captura de la corrida de verdad. El README explica el alcance y el comando que crea un SQL Server desechable desde cero. El tablero de Trello y la entrega en Moodle siguen siendo superficies externas que se verifican por separado.", "El repositorio contiene fuente reproducible y evidencia real.")
 
 # 13 · cierre que se puede decir sin leer.
 s = new_slide(prs, GREEN)

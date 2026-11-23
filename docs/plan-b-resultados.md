@@ -1,36 +1,36 @@
-# Plan B — resultados de la corrida SQL Server
+# Corrida reproducible en SQL Server — evidencia
 
-**Última comprobación:** 23 de noviembre de 2026. SQL Server 2022, contenedor temporal aislado, base vacía, cuatro scripts ejecutados en orden. La evidencia completa de consola está en `docs/evidencia-ejecucion-sqlserver-2026-11-23.txt`. La instancia temporal se elimina al terminar la verificación.
+**Fecha:** 23 de noviembre de 2026. Se creó una base vacía en SQL Server 2022 Developer, en un contenedor temporal sin puertos publicados. Los cuatro scripts se ejecutaron en orden. El contenedor se eliminó tras la captura.
 
-## Conteos reproducidos
+## Resultado comprobado
 
-| Control | Resultado | Lectura sencilla |
+| Capa / control | Resultado | Qué significa |
 |---|---:|---|
-| POS en Bronce → ventas en Oro | 5 → 5 | Las cinco ventas válidas se integran |
-| IDs de venta distintos en Bronce | 5 | No había duplicados en la muestra real |
-| Filas POS inválidas | 0 | Las conversiones y rangos pasan |
-| Clientes / vinos huérfanos | 0 / 0 | Ninguna relación falta |
+| POS en Bronce | 7 filas | 5 ventas base + 2 registros sintéticos para la demostración |
+| IDs POS únicos / duplicados | 6 / 1 | `ROW_NUMBER()` selecciona la versión de `POS-805` a las 19:30 |
+| POS inválidos / ventas Oro | 1 / 5 | `POS-806` no convierte `muchas` a cantidad y queda fuera de Oro |
+| Ratings Bronce / válidos / inválidos | 4 / 3 / 1 | El rating sintético 120 sale de la escala 0–100 |
+| CRM | 4 clientes / 1 proxy | El valor imputado de `CLI-V02` es $4,920 observados, no gasto anual confirmado |
+| Oro | 5 ventas / 24 botellas / $22,760 MXN | Totales de la muestra válida |
 | Venta anónima | 1 / $450 MXN | Se conserva bajo `CLI-MOSTRADOR` |
-| CRM | 4 filas / 4 clientes | Un gasto se marca como proxy |
-| Ratings | 3 filas / 3 válidos | No hay puntajes inválidos |
-| Ventas / botellas / ingresos Oro | 5 / 24 / $22,760 MXN | Totales observados |
-| Ticket promedio | $4,552 MXN | Promedio de cinco transacciones |
-| Proxy de `CLI-V02` | $4,920 MXN | No es gasto anual confirmado |
+| Clientes / vinos huérfanos | 0 / 0 | Las relaciones de la muestra se resuelven |
+| Reejecución de la integración | 5 ventas / 24 botellas / $22,760 MXN | No duplica el hecho Oro |
 
-## Dos lecturas de negocio
+Las filas sucias añadidas son **sintéticas y didácticas**; se identifican así en el SQL. La corrida no tiene interfaz SSMS: es una ejecución real de `sqlcmd` conectada a SQL Server 2022. La imagen [captura-sqlserver-demo-2026-11-23.png](captura-sqlserver-demo-2026-11-23.png) muestra la consola y [evidencia-ejecucion-sqlserver-2026-11-23.txt](evidencia-ejecucion-sqlserver-2026-11-23.txt) conserva la salida íntegra.
 
-- Rioja: 12 botellas y `$14,400 MXN`, el 63.27% del ingreso observado.
-- Platinum: 12 de 15 botellas (80%) tienen puntaje >93; las compró una persona en esta muestra.
-- Interpretación: hipótesis para medir con una prueba y más clientes; no es causalidad ni patrón validado.
+## Lectura de negocio
 
-## Alcance de la corrida
+- Rioja suma 12 botellas y $14,400 MXN, 63.27% del ingreso observado.
+- Las 12 botellas Platinum con puntaje >93 corresponden a una persona de esta muestra.
+- Es una hipótesis para medir con más clientes, no una relación causal ni un patrón validado.
 
-- Las cinco vistas (`oro`) respondieron y los siete procedimientos (`plata`) se ejecutaron, incluido el registro de un cliente temporal dentro de una transacción revertida.
-- La reejecución de ingesta/ETL y del script de vistas conservó cinco ventas, cinco IDs únicos, 24 botellas y `$22,760 MXN`.
-- Los cuatro scripts también se ejecutaron otra vez, en orden y sin errores, sobre la misma base temporal; los conteos se mantuvieron en 5 ventas, 24 botellas y `$22,760 MXN`.
-- En una prueba aislada se agregó una segunda versión posterior de `POS-805`. Al reprocesar, Oro mantuvo cinco ventas y eligió la fecha más reciente. Se borró la fila de prueba al finalizar; los datos de la muestra volvieron a quedar en su estado original.
-- Los scripts no fueron conectados a una instancia persistente; el contenedor QA fue desechable.
+## Cobertura técnica verificada
 
-## Uso durante la exposición
+- Se consultaron las cinco vistas y se ejecutaron los siete procedimientos.
+- La base se creó desde cero con los cuatro archivos `src/01` → `src/04`.
+- La segunda ejecución de `usp_ProcesarPlata` mantuvo 5 ventas, 24 botellas y $22,760 MXN.
+- No se conectó a una instancia persistente; el script [run-sqlserver-demo.sh](../tasks/run-sqlserver-demo.sh) genera una contraseña temporal en memoria, publica cero puertos y elimina el contenedor al cerrar.
 
-Intentar la corrida en vivo primero. Si SQL Server/SSMS falla, abrir el PPT/PDF final y este resumen; también se conserva el log completo en la carpeta `docs/`. El log es salida real de `sqlcmd`, **no una captura de SSMS**. Si piden una captura de la interfaz, habrá que tomarla en la computadora donde se hará la exposición y nombrarla como respaldo.
+## Uso para la exposición
+
+La diapositiva 6 muestra la evidencia visual real. Para demostrarlo en otra computadora, ejecutar `./tasks/run-sqlserver-demo.sh` con Docker instalado; si no está disponible, se conserva el PDF y la salida completa. No afirmar que la captura se obtuvo en SSMS.
