@@ -25,7 +25,7 @@ La muestra POS suma 24 botellas y $22,760 MXN. Una transacción con cliente nulo
 - **Plata (`plata`):** estandariza con `TRIM`/`UPPER`, convierte con `TRY_CONVERT`, resuelve duplicados por llave de negocio con `ROW_NUMBER()` y aplica reglas y claves.
 - **Oro (`oro`):** concentra los hechos POS y expone vistas para análisis, calidad y KPIs.
 
-La ingesta de demostración usa datos de referencia incluidos en SQL y un objeto JSON de ejemplo. Los archivos originales CSV/JSON/SQL no estaban disponibles en el paquete local; las cargas deben reemplazarse por fuentes originales si el equipo las recupera.
+La ingesta de demostración usa datos de referencia incluidos en los scripts SQL y un objeto JSON de ejemplo. No recibimos los archivos fuente originales CSV, Excel o JSON; si el equipo los recupera, debe sustituir la muestra por esas fuentes.
 
 ## 3. Modelo entidad-relación (DER)
 
@@ -48,15 +48,22 @@ assets/
 ├── portada-vinicola-golden-hour.png
 ├── uvas-dorado.png
 ├── bodega-barricas.png
-└── logo_conceptual-alba.png
+├── logo_conceptual-alba.png
+├── fuente-punto-venta.png
+├── clientes-vinicola.png
+├── flujo-medallon-fotografico.png
+└── insight-de-negocio.png
 docs/
 ├── presentacion-final-equipo-2.pptx / .pdf
 ├── avance.docx / .pdf
 ├── demo-y-guion.md
+├── guion-rapido-por-integrante.md
 ├── banco-preguntas-oficial-equipo-2.pdf
 ├── respuestas-banco-preguntas-por-rol.md
 ├── plan-b-resultados.md
 └── guia-presentacion-proyecto-final.pdf
+tasks/
+└── generate_presentation.py
 README.md
 ```
 
@@ -65,7 +72,7 @@ README.md
 3. `03_etl_limpieza_plata.sql`: siete procedimientos, conversiones, estandarización, deduplicación e integración idempotente.
 4. `04_vistas_gold_bi.sql`: cinco vistas Oro, KPIs y validaciones cuantitativas.
 
-El deck del avance previo se conserva en `docs/archivo-historico/`; el archivo final para exponer es `docs/presentacion-final-equipo-2.pptx` (también exportado a PDF). El guion por rol y la salida de Plan B están en `docs/demo-y-guion.md` y `docs/plan-b-resultados.md`.
+El deck del avance previo se conserva en `docs/archivo-historico/`; el archivo final para exponer es `docs/presentacion-final-equipo-2.pptx` (también exportado a PDF). El guion por rol, la guía corta para ensayar preguntas y la salida de Plan B están en `docs/demo-y-guion.md`, `docs/guion-rapido-por-integrante.md` y `docs/plan-b-resultados.md`.
 La guía de avance anterior también queda en `docs/archivo-historico/`; la guía que rige esta presentación está en `docs/guia-presentacion-proyecto-final.pdf`.
 
 ### Ejecución
@@ -96,6 +103,7 @@ La distribución coincide con los cinco roles del banco oficial de evaluación d
 - **Documentación y Trello:** Joel Ibarra.
 
 La distribución sigue el banco oficial de evaluación por rol del Equipo 2.
+Para ajustarse también a la guía de presentación en equipos de cinco, la exposición divide Liderazgo/BI: Ezequiel conduce y responde la sección comercial; Joel presenta la lectura BI junto con documentación y Trello. La guía corta conserva los nombres del banco oficial para repartir las preguntas.
 
 ## Presentación final
 

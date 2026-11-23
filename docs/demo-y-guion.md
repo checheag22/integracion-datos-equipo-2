@@ -12,12 +12,14 @@
 
 ## Distribución orientativa (12–15 minutos, incluida demo)
 
-- Ezequiel, Líder de Proyecto + BI Specialist: propósito, alcance, KPIs y cierre (2 min).
+- Ezequiel, Líder de Proyecto: propósito, alcance y coordinación del cierre (2–3 min).
 - José, Arquitecto: fuentes, arquitectura, DER, PK/FK y repositorio (2.5 min).
 - Patricio, Ingeniero ETL: limpieza, idempotencia y corrida en vivo (4.5 min incluida demo).
 - Ximena, QA: calidad, controles y límites de la muestra (2 min).
-- Joel, Documentación y Trello: repositorio, diccionario de datos y coordinación de versiones (1.5 min).
+- Joel, BI + Documentación y Trello: lectura de Oro, insight, repositorio y tablero (2–3 min).
 - Transiciones y preguntas al público: 0.5–1 min. Después reservar 6–8 min para preguntas individuales por rol.
+
+La guía oficial divide Liderazgo/BI para equipos de cinco; el banco oficial de preguntas mantiene a Ezequiel como Líder + BI y a Joel como Documentación/Trello. Para la exposición oral, Joel presenta BI junto con el repositorio. Ambos preparan el insight y Ezequiel contesta la pregunta de decisión que aparece a su nombre en el banco.
 
 ## Banco oficial de preguntas por rol
 
