@@ -81,6 +81,10 @@ La guía que rige esta presentación está en `docs/guia-presentacion-proyecto-f
 
 ### Ejecución
 
+### Corrida única desde SSMS
+
+Para ejecutar la demostración en una sola operación, abre `src/00_demo_completa_ssms.sql` en SSMS, activa **Consulta > Modo SQLCMD**, conéctate a una instancia de práctica desde `master` y pulsa F5. El script reúne los cuatro pasos en orden y se detiene si la base `DB_Vinicola_Integration` ya existe o si un paso genera un error. No elimina bases ni datos. Requiere permiso para crear la base.
+
 En SQL Server 2022, ejecutar los cuatro archivos en orden (`01` → `04`) dentro de una instancia de práctica. Para una corrida aislada reproducible en macOS con Docker instalado, ejecutar `./tasks/run-sqlserver-demo.sh`; crea una instancia temporal sin puertos publicados y la elimina al cerrar la sesión. No ejecutar sobre una instancia con políticas que impidan crear `DB_Vinicola_Integration`.
 
 La carga actual utiliza `INSERT` y `OPENJSON`; no usa `BULK INSERT` porque los archivos originales no se incluyeron. No ejecutar sobre una instancia con políticas que impidan crear `DB_Vinicola_Integration`.
