@@ -460,25 +460,27 @@ for i, (num, title, body, tone) in enumerate(next_steps):
 footer(s, 16, total)
 note(s, 1.25, "Ximena cierra la parte de mejora desde calidad. Primero cambiaríamos la carga de muestra por fuentes reales y registraríamos de qué archivo y lote vino cada fila. Segundo, conservaríamos los rechazos con su motivo para que no se queden solo en Bronce. Tercero, ampliaríamos periodos y clientes para ver si los KPIs se mantienen. Finalmente, agregaríamos inventario solo cuando esté disponible. Son pasos concretos; no presentamos funciones que todavía no están implementadas.", "Ordenar mejoras por calidad y disponibilidad de datos, no por apariencia.")
 
-# 12 · Entregables / dónde están / pendientes reales.
-s = new_slide(prs, GREEN)
-add_photo(s, "portada-vinicola-golden-hour.png", 7.35, 0, W - 7.35, H, focus=(0.68, 0.52))
-add_rect(s, 0, 0, 7.42, H, GREEN, radius=False)
-heading(s, "08 · Entrega", "Código, visuales y defensa en un solo lugar", "Abrir el clon en GitHub Desktop y después mostrar el tablero privado de Trello.", dark=True)
-deliveries = [
-    ("src/", "4 scripts SQL · orden 01 → 04"),
-    ("assets/", "logo, flujo Medallón, DER y fotos"),
-    ("docs/", "PPT/PDF, guion, Q&A, log y captura SQL real"),
-    ("tasks/", "corrida limpia y reproducible con Docker"),
+# 17 · Distinguir fuente del proyecto, coordinación y envío.
+s = new_slide(prs, IVORY)
+heading(s, "09 · Seguimiento y entrega", "Tres lugares, tres trabajos distintos", "Así sabemos dónde está el código, quién sigue y dónde se entrega.")
+workflow = [
+    ("01", "REPOSITORIO", "Scripts SQL · presentación · guía · evidencia de corrida", "Aquí vive la versión reproducible.", BURGUNDY),
+    ("02", "TRELLO", "Responsable · siguiente tarea · evidencia por cerrar", "El tablero privado organiza el seguimiento del equipo.", GOLD),
+    ("03", "MOODLE", "PDF final de la exposición", "Aquí se hace la entrega académica.", GREEN2),
 ]
-for i, (name, desc) in enumerate(deliveries):
-    y = 2.0 + i * 0.71
-    add_text(s, 0.75, y, 1.65, 0.3, name, 13, "D7B879", True)
-    add_text(s, 2.35, y, 4.35, 0.37, desc, 12, WHITE)
-add_rect(s, 0.72, 5.15, 6.18, 1.25, "294D43")
-add_text(s, 0.95, 5.34, 5.72, 0.85, "GitHub Desktop: mostrar el clon y la rama local; abrir src/, assets/ y README. Moodle: abre 24-nov 11:00; cierra 26-nov 15:00.", 11, WHITE, True, valign=MSO_ANCHOR.MIDDLE)
+for i, (num, title, detail, desc, tone) in enumerate(workflow):
+    y = 1.95 + i * 1.34
+    add_rect(s, 0.82, y, 11.72, 1.08, PAPER, line="E7DFD2")
+    add_rect(s, 0.82, y, 0.76, 1.08, tone, radius=False)
+    add_text(s, 0.95, y + 0.35, 0.5, 0.25, num, 13, WHITE, True, align=PP_ALIGN.CENTER)
+    add_text(s, 1.88, y + 0.15, 2.5, 0.25, title, 11, BURGUNDY if i == 0 else GREEN, True)
+    add_text(s, 4.35, y + 0.13, 7.7, 0.28, detail, 12, INK, True)
+    add_text(s, 4.35, y + 0.53, 7.7, 0.27, desc, 10, MUTED)
+    if i < 2:
+        add_text(s, 1.03, y + 1.08, 0.32, 0.28, "↓", 16, GOLD, True, align=PP_ALIGN.CENTER)
+add_text(s, 1.0, 6.25, 11.3, 0.35, "Trello da seguimiento; GitHub conserva los archivos; Moodle recibe la entrega.", 12, GREEN, True, align=PP_ALIGN.CENTER)
 footer(s, 17, total)
-note(s, 0.75, "Joel ubica la entrega: cuatro scripts SQL en orden, diagramas, presentación, guion y evidencia de la corrida. El repositorio incluye el comando reproducible para crear una instancia temporal desde cero. El tablero de Trello y la entrega en Moodle se verifican por separado.", "Mostrar dónde está cada evidencia para que el resultado se pueda repetir.")
+note(s, 0.75, "Joel distingue tres funciones. GitHub guarda los cuatro scripts, la presentación y la evidencia reproducible. Trello organiza responsable, siguiente tarea y prueba de cierre en un tablero privado. Moodle es donde se sube el PDF como entrega académica cuando la actividad está abierta. El tablero no sustituye los archivos ni la entrega.", "GitHub conserva; Trello coordina; Moodle recibe.")
 
 # 13 · cierre que se puede decir sin leer.
 s = new_slide(prs, GREEN)

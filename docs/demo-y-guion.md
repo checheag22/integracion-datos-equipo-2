@@ -65,7 +65,7 @@ En la evidencia señalar `7 → 6 → 5`, la versión de POS-805 a las 19:30, la
 
 ### Diapositivas 17–18 · Joel y Ezequiel
 
-**Joel:** ubicar scripts, diagramas, presentación y evidencia en el repositorio.
+**Joel:** “GitHub guarda los scripts, la presentación y la evidencia; Trello nos dice quién sigue y qué evidencia falta; Moodle es donde se entrega el PDF.”
 
 **Ezequiel:** “Integramos fuentes para responder una pregunta con reglas claras. El siguiente paso es medir la hipótesis con más datos. Gracias; ahora pasamos a preguntas.”
 

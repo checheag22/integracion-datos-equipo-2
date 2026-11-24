@@ -16,7 +16,7 @@ Las preguntas comienzan **después** de los 25 minutos. Las respuestas del banco
 > Equipo, actualicé la presentación para que la **exposición dure 25 minutos completos**; la ronda de preguntas va después y sus respuestas no están en las diapositivas. Este es el reparto:
 >
 > • **Ezequiel:** diapositivas 1–3, parte de la 13, 14 y 18. Presenta el objetivo y el alcance; cierra la lectura de negocio, propone cómo medir la hipótesis y da el cierre. Tiempo: **5:15**.
-> • **Joel:** diapositivas 4, 12, parte de la 13 y 17. Explica qué aporta cada fuente y sus llaves, para qué sirven las vistas, lee los indicadores y ubica los entregables. Tiempo: **4:45**.
+> • **Joel:** diapositivas 4, 12, parte de la 13 y 17. Explica qué aporta cada fuente, presenta las vistas, lee indicadores y aclara qué se hace en GitHub, Trello y Moodle. Tiempo: **4:45**.
 > • **José:** diapositivas 5–7. Explica Bronce, Plata y Oro, sigue el ejemplo de POS-805 por las capas y presenta el modelo y las llaves. Tiempo: **4:45**.
 > • **Patricio:** diapositivas 8–10. Hace el recorrido de la corrida SQL, explica las reglas de limpieza y demuestra que reprocesar no duplica las ventas. Tiempo: **6:00**.
 > • **Ximena:** diapositivas 11 y 15–16. Explica los controles, los límites de la muestra y qué mejoras seguirían. Tiempo: **4:15**.
