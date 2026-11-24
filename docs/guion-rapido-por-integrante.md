@@ -1,34 +1,20 @@
 # Reparto rápido — exposición de 25 minutos
 
-Las preguntas comienzan **después** de los 25 minutos. Las respuestas del banco oficial están aparte en [`respuestas-banco-preguntas-por-rol.md`](respuestas-banco-preguntas-por-rol.md); no se proyectan como contenido de la exposición.
+La exposición tiene 14 diapositivas. Las respuestas del profesor se preparan aparte con el banco oficial y se contestan después; no están escritas en el deck. El guion completo, con qué decir en cada diapositiva, está en [`vinicola/Guion_Exposicion_25_Minutos.md`](vinicola/Guion_Exposicion_25_Minutos.md).
 
 | Integrante | Diapositivas | Tiempo | Parte |
 |---|---:|---:|---|
-| Ezequiel Aguilera | 1–3, parte de 13, 14, 18 | 5:15 | Objetivo, alcance, lectura comercial, prueba propuesta y cierre. |
-| Joel Ibarra | 4, 12, parte de 13, 17 | 4:45 | Fuentes y llaves, vistas, lectura de indicadores y repositorio. |
-| José Hernández | 5–7 | 4:45 | Capas Bronce/Plata/Oro, recorrido de una fila, modelo relacional. |
-| Patricio García | 8–10 | 6:00 | Corrida desde cero, limpieza e idempotencia. |
-| Ximena Ibarra | 11, 15–16 | 4:15 | Controles, límites y mejoras priorizadas. |
-| **Total** | **18 diapositivas** | **25:00** | Preguntas al terminar. |
+| Ezequiel Aguilera | 1–2, 11, 14 | 6:00 | Presenta la pregunta y el alcance, interpreta la señal comercial y cierra. |
+| José Hernández | 3–5 | 5:00 | Explica integración, fuentes, llaves y relaciones. |
+| Patricio García | 6–8 (primeros 2:15 de la demo) | 6:00 | Explica capas y deduplicación; abre la corrida SQL. |
+| Ximena Ibarra | 8 (1:00), 9, 12 | 4:15 | Explica controles durante la demo y los conteos, después habla de límites. |
+| Joel Ibarra | 8 (últimos 0:45), 10, 13 | 3:45 | Confirma vistas y procedimientos, explica consultas y seguimiento. |
+| **Total** | **14 diapositivas** | **25:00** | **Preguntas al terminar.** |
 
-## Mensaje listo para enviar al grupo
+## Mensaje para el grupo
 
-> Equipo, actualicé la presentación para que la **exposición dure 25 minutos completos**; la ronda de preguntas va después y sus respuestas no están en las diapositivas. Este es el reparto:
+> Equipo, dejé la presentación en 14 diapositivas con una explicación más sencilla. Dura 25 minutos y las preguntas van al final.
 >
-> • **Ezequiel:** diapositivas 1–3, parte de la 13, 14 y 18. Presenta el objetivo y el alcance; cierra la lectura de negocio, propone cómo medir la hipótesis y da el cierre. Tiempo: **5:15**.
-> • **Joel:** diapositivas 4, 12, parte de la 13 y 17. Explica qué aporta cada fuente, presenta las vistas, lee indicadores y aclara qué se hace en GitHub, Trello y Moodle. Tiempo: **4:45**.
-> • **José:** diapositivas 5–7. Explica Bronce, Plata y Oro, sigue el ejemplo de POS-805 por las capas y presenta el modelo y las llaves. Tiempo: **4:45**.
-> • **Patricio:** diapositivas 8–10. Hace el recorrido de la corrida SQL, explica las reglas de limpieza y demuestra que reprocesar no duplica las ventas. Tiempo: **6:00**.
-> • **Ximena:** diapositivas 11 y 15–16. Explica los controles, los límites de la muestra y qué mejoras seguirían. Tiempo: **4:15**.
+> Ezequiel: 1–2, 11 y 14. José: 3–5. Patricio: 6–8, abre la demo. Ximena explica los controles durante la demo y presenta 9 y 12. Joel cierra la demo y explica 10 y 13.
 >
-> El profesor permite usar datos falsos para el recorrido: los ejemplos sintéticos están identificados como datos de prueba, no como ventas reales. La corrida comprobada dio 7 filas POS → 6 IDs → 5 ventas Oro, con 24 botellas y $22,760. Ensayemos con cronómetro para mantener los 25 minutos y dejemos las preguntas para el final. Cada quien revise por separado sus dos preguntas prioritarias del banco.
-
-## Ideas clave para recordar
-
-- **Ezequiel:** la muestra inspira una prueba comercial; no prueba causalidad.
-- **Joel:** `ID_Cliente` y `SKU_Vino` explican cómo se integran las fuentes.
-- **José:** Bronce conserva, Plata transforma, Oro responde.
-- **Patricio:** `TRIM` limpia, `ROW_NUMBER` elige la última versión y `TRY_CONVERT` excluye valores no convertibles.
-- **Ximena:** la vista de calidad cuenta entradas, errores y salida válida.
-
-La corrida, captura y salida están en `plan-b-resultados.md`, `captura-sqlserver-demo-2026-11-23.png` y `evidencia-ejecucion-sqlserver-2026-11-23.txt`.
+> En la diapositiva 8, Patricio habla 2:15, Ximena 1 minuto y Joel 45 segundos. El guion de qué decir está en `docs/vinicola/Guion_Exposicion_25_Minutos.md`. Ensayemos con cronómetro y dejemos las respuestas del profesor para después de los 25 minutos.

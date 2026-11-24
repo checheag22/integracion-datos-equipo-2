@@ -19,7 +19,7 @@ La muestra base tiene cinco ventas, cuatro clientes y tres vinos. Para cumplir l
 
 ## 2. Arquitectura de integración (SQL Server)
 
-![Flujo de integración Medallón](assets/flujo_medallon_sql.png)
+![Flujo de integración Medallón](assets/vinicola/capas.png)
 
 - **Bronce (`bronce`):** guarda el texto tal como llega, incluso espacios, una fila repetida y valores inválidos, para que se puedan revisar.
 - **Plata (`plata`):** limpia espacios/categorías, intenta convertir números, elige la versión más reciente por llave y forma las dimensiones de cliente y vino.
@@ -29,7 +29,7 @@ La ingesta de demostración usa datos de referencia incluidos en los scripts SQL
 
 ## 3. Modelo entidad-relación (DER)
 
-![Diagrama Entidad-Relación](assets/diagrama_der_sqlserver.png)
+![Relaciones entre cliente, venta y vino](assets/vinicola/relaciones.png)
 
 Las llaves foráneas físicas salen de `oro.Fact_Ventas_POS` hacia `plata.Dim_Clientes` y `plata.Dim_Vinos`. Las líneas punteadas representan transformación ETL, no relaciones físicas.
 
@@ -43,12 +43,6 @@ src/
 └── 04_vistas_gold_bi.sql
 assets/
 ├── logo_negocio.png
-├── flujo_medallon_sql.png
-├── diagrama_fuentes_integracion.png
-├── diagrama_recorrido_pos805.png
-├── diagrama_controles_calidad.png
-├── diagrama_prueba_comercial.png
-├── diagrama_der_sqlserver.png
 ├── portada-vinicola-golden-hour.png
 ├── uvas-dorado.png
 ├── bodega-barricas.png
@@ -59,9 +53,8 @@ assets/
 ├── fuentes-vinicola-conceptual.png
 ├── prueba-recomendacion-conceptual.png
 ├── insight-de-negocio.png
-└── sqlserver_resultados.png
 docs/
-├── presentacion-final-equipo-2.pptx / .pdf
+├── presentacion-final-equipo-2.pptx / .pdf (14 diapositivas)
 ├── avance.docx / .pdf
 ├── demo-y-guion.md
 ├── guion-rapido-por-integrante.md
@@ -83,7 +76,7 @@ README.md
 3. `03_etl_limpieza_plata.sql`: siete procedimientos, conversiones, estandarización, deduplicación e integración idempotente.
 4. `04_vistas_gold_bi.sql`: cinco vistas Oro, KPIs y validaciones cuantitativas.
 
-El deck del avance previo se conserva en `docs/archivo-historico/`; la presentación final editable tiene 18 diapositivas, notas del expositor y un guion de **25 minutos de exposición y demo**. Las preguntas se responden después; la presentación no muestra sus respuestas. El guion y el reparto por integrante están en `docs/demo-y-guion.md` y `docs/guion-rapido-por-integrante.md`; el banco de respuestas queda aparte.
+El deck del avance previo se conserva en `docs/archivo-historico/`; la presentación final editable tiene 14 diapositivas, diagramas como imágenes generadas y notas del expositor. El guion completo programa **25 minutos de exposición y demo**. Las preguntas se responden después; la presentación no muestra sus respuestas. El guion completo y el reparto actualizado están en `docs/vinicola/Guion_Exposicion_25_Minutos.md` y `docs/guion-rapido-por-integrante.md`; el banco de respuestas queda aparte.
 La guía que rige esta presentación está en `docs/guia-presentacion-proyecto-final.pdf`. Moodle pide 25–35 minutos; la guía PDF adjunta marca 20–25 minutos. Para cumplir el mínimo de Moodle sin mezclarlo con preguntas, esta versión programa 25 minutos de exposición; las preguntas se dejan para después.
 
 ### Ejecución
@@ -118,4 +111,9 @@ Para ajustarse también a la guía de presentación en equipos de cinco, la expo
 
 ## Presentación final
 
-La portada, las imágenes de uvas/bodega y los nuevos apoyos de POS/vino y comparación de recomendaciones son conceptuales; no representan transacciones ni una campaña real. Los diagramas raster de fuentes, recorrido, calidad y prueba comercial usan nombres y cifras del proyecto. La evidencia de ejecución real está separada en la captura y el log de `sqlcmd`. La presentación editable, su PDF y la guía de respuestas del banco oficial están en `docs/`.
+La presentación final se reorganizó como un recorrido fácil de explicar: pregunta de negocio, teoría con una analogía, fuentes y llaves, capas, una fila de ejemplo, ejecución SQL, resultados y límites. Los cuatro diagramas son imágenes generadas para este proyecto, no dibujos hechos con código. La portada es una escena conceptual; la diapositiva de SQL usa la captura real de `sqlcmd`. El guion completo reparte 25 minutos entre los cinco integrantes. Las respuestas al banco de preguntas permanecen en un documento aparte y no se muestran en las diapositivas.
+
+
+### Apoyos visuales generados
+
+Las imágenes generadas para la presentación están en `assets/vinicola/` (fuentes, relaciones, capas, deduplicación y portada). `evidencia-sql.png` es la captura original de la salida de SQL Server recuperada del historial del proyecto.
