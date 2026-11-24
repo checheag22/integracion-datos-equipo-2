@@ -44,6 +44,10 @@ src/
 assets/
 ├── logo_negocio.png
 ├── flujo_medallon_sql.png
+├── diagrama_fuentes_integracion.png
+├── diagrama_recorrido_pos805.png
+├── diagrama_controles_calidad.png
+├── diagrama_prueba_comercial.png
 ├── diagrama_der_sqlserver.png
 ├── portada-vinicola-golden-hour.png
 ├── uvas-dorado.png
@@ -52,6 +56,8 @@ assets/
 ├── fuente-punto-venta.png
 ├── clientes-vinicola.png
 ├── flujo-medallon-fotografico.png
+├── fuentes-vinicola-conceptual.png
+├── prueba-recomendacion-conceptual.png
 ├── insight-de-negocio.png
 └── sqlserver_resultados.png
 docs/
@@ -112,4 +118,4 @@ Para ajustarse también a la guía de presentación en equipos de cinco, la expo
 
 ## Presentación final
 
-La portada y las imágenes de uvas y bodega son visuales conceptuales generados para este proyecto; no representan una ubicación o marca comercial confirmada. La diapositiva de ETL muestra valores reales de la muestra antes y después de estandarizar. La presentación editable, su PDF y la guía de respuestas del banco oficial están en `docs/`.
+La portada, las imágenes de uvas/bodega y los nuevos apoyos de POS/vino y comparación de recomendaciones son conceptuales; no representan transacciones ni una campaña real. Los diagramas raster de fuentes, recorrido, calidad y prueba comercial usan nombres y cifras del proyecto. La evidencia de ejecución real está separada en la captura y el log de `sqlcmd`. La presentación editable, su PDF y la guía de respuestas del banco oficial están en `docs/`.

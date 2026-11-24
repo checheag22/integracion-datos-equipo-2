@@ -67,6 +67,119 @@ def make_medallion_asset():
     im.save(ASSETS / "flujo_medallon_sql.png", optimize=True)
 
 
+def make_sources_diagram():
+    """Raster source-to-join map with exact project keys and fields."""
+    im = Image.new("RGB", (1600, 1000), "#F6F1E8")
+    d = ImageDraw.Draw(im)
+    cards = [
+        ("POS", "¿Qué se vendió?", "ID_Cliente + SKU_Vino", "canal · cantidad · precio", "#6C303A", 105),
+        ("CRM", "¿Quién compró?", "ID_Cliente", "membresía · ciudad · gasto", "#B58B45", 395),
+        ("RATINGS", "¿Qué vino es?", "SKU_Vino", "puntaje · etiqueta · origen", "#28564A", 685),
+    ]
+    for tag, question, a, b, color, y in cards:
+        d.rounded_rectangle((55, y, 585, y + 210), radius=24, fill="#FFFCF7", outline="#DED4C5", width=3)
+        d.rounded_rectangle((55, y, 250, y + 210), radius=24, fill=color)
+        d.rectangle((220, y, 250, y + 210), fill=color)
+        d.text((82, y + 32), tag, font=font(31, True), fill="white")
+        d.text((82, y + 96), question, font=font(18, True), fill="#F7EFE5")
+        d.text((282, y + 48), a, font=font(21, True), fill="#26312C")
+        d.text((282, y + 98), b, font=font(18), fill="#6F726B")
+    # Converging source arrows into the shared business keys.
+    for sy, ey in [(210, 485), (500, 500), (790, 515)]:
+        d.line((590, sy, 695, ey), fill="#BE9856", width=8)
+        d.polygon([(695, ey), (671, ey - 17), (671, ey + 17)], fill="#BE9856")
+    d.rounded_rectangle((720, 365, 1095, 635), radius=30, fill="#183D34")
+    d.text((780, 406), "INTEGRACIÓN", font=font(22, True), fill="#D7B879")
+    d.text((778, 462), "ID_Cliente", font=font(30, True), fill="white")
+    d.text((778, 515), "+", font=font(24, True), fill="#D7B879")
+    d.text((778, 554), "SKU_Vino", font=font(30, True), fill="white")
+    d.line((1098, 500, 1200, 500), fill="#BE9856", width=9)
+    d.polygon([(1200, 500), (1170, 478), (1170, 522)], fill="#BE9856")
+    d.rounded_rectangle((1220, 365, 1550, 635), radius=30, fill="#FFFCF7", outline="#DED4C5", width=3)
+    d.rounded_rectangle((1220, 365, 1550, 430), radius=28, fill="#28564A")
+    d.rectangle((1220, 400, 1550, 430), fill="#28564A")
+    d.text((1260, 385), "VENTA CON CONTEXTO", font=font(19, True), fill="white")
+    d.text((1265, 470), "venta + cliente", font=font(22, True), fill="#26312C")
+    d.text((1265, 515), "+ vino", font=font(22, True), fill="#26312C")
+    d.text((1265, 575), "hecho para consultar", font=font(16, True), fill="#6C303A")
+    im.save(ASSETS / "diagrama_fuentes_integracion.png", optimize=True)
+
+
+def make_row_journey_diagram():
+    """Show how the real synthetic duplicate resolves across the three layers."""
+    im = Image.new("RGB", (1900, 700), "#F6F1E8")
+    d = ImageDraw.Draw(im)
+    defs = [
+        (70, 145, 595, 570, "#6C303A", "BRONCE · DOS VERSIONES", ["' POS-805 '    19:15", "' POS-805 '    19:30", "La fuente conserva las dos filas"]),
+        (690, 145, 1285, 570, "#B58B45", "PLATA · APLICAR REGLAS", ["TRIM(ID_Venta_POS)", "ROW_NUMBER() por ID", "Ordenar por Fecha_Hora DESC", "Gana la versión de 19:30"]),
+        (1380, 145, 1830, 570, "#28564A", "ORO · UNA VENTA", ["POS-805 · 19:30", "ID único", "Cliente y vino relacionados"]),
+    ]
+    for x1, y1, x2, y2, color, title, rows in defs:
+        d.rounded_rectangle((x1, y1, x2, y2), radius=28, fill="#FFFCF7", outline="#DED4C5", width=3)
+        d.rounded_rectangle((x1, y1, x2, y1 + 76), radius=28, fill=color)
+        d.rectangle((x1, y1 + 48, x2, y1 + 76), fill=color)
+        d.text((x1 + 26, y1 + 22), title, font=font(21, True), fill="white")
+        for j, row in enumerate(rows):
+            d.text((x1 + 30, y1 + 128 + j * 70), row, font=font(20 if j == 0 else 18, j == 0), fill="#26312C" if j == 0 else "#596159")
+    for x in (610, 1300):
+        d.line((x, 355, x + 64, 355), fill="#BE9856", width=10)
+        d.polygon([(x + 64, 355), (x + 38, 334), (x + 38, 376)], fill="#BE9856")
+    d.rounded_rectangle((70, 610, 1830, 675), radius=18, fill="#F1E7D5")
+    d.text((104, 628), "La fila de 19:15 queda identificada como versión anterior; Bronce conserva la evidencia para explicar la elección.", font=font(20, True), fill="#26312C")
+    im.save(ASSETS / "diagrama_recorrido_pos805.png", optimize=True)
+
+
+def make_quality_diagram():
+    """Two-lane quality funnel for POS rows and ratings."""
+    im = Image.new("RGB", (1800, 705), "#F6F1E8")
+    d = ImageDraw.Draw(im)
+    lanes = [
+        (65, 85, "POS", ["7 filas", "6 IDs", "5 ventas Oro"], ["Bronce", "− 1 versión duplicada", "− POS-806: cantidad inválida"], "#6C303A"),
+        (370, 85, "RATINGS", ["4 recibidos", "1 fuera de rango", "3 válidos"], ["Bronce", "rating 120", "regla 0–100"], "#28564A"),
+    ]
+    for y, _, title, vals, notes, color in lanes:
+        d.rounded_rectangle((50, y, 1750, y + 235), radius=26, fill="#FFFCF7", outline="#DED4C5", width=3)
+        d.rounded_rectangle((50, y, 235, y + 235), radius=26, fill=color)
+        d.rectangle((195, y, 235, y + 235), fill=color)
+        d.text((82, y + 88), title, font=font(25, True), fill="white")
+        xs = [310, 820, 1325]
+        for i, (val, note_text) in enumerate(zip(vals, notes)):
+            d.rounded_rectangle((xs[i], y + 38, xs[i] + 360, y + 190), radius=20, fill="#F6F1E8")
+            d.text((xs[i] + 24, y + 64), val, font=font(25, True), fill=color if i != 1 else "#8A3642")
+            d.text((xs[i] + 24, y + 119), note_text, font=font(18), fill="#596159")
+            if i < 2:
+                d.line((xs[i] + 370, y + 115, xs[i + 1] - 20, y + 115), fill="#BE9856", width=8)
+                d.polygon([(xs[i + 1] - 20, y + 115), (xs[i + 1] - 44, y + 98), (xs[i + 1] - 44, y + 132)], fill="#BE9856")
+    d.text((74, 650), "CRM: 4 clientes · 1 gasto proxy señalado     |     Relaciones: 0 huérfanos · 1 venta anónima conservada", font=font(19, True), fill="#26312C")
+    im.save(ASSETS / "diagrama_controles_calidad.png", optimize=True)
+
+
+def make_experiment_diagram():
+    """A simple, readable path from signal to a measurable test."""
+    im = Image.new("RGB", (1400, 900), "#183D34")
+    d = ImageDraw.Draw(im)
+    steps = [
+        ("01", "SEÑAL", "Rioja: 63.27%\ndel ingreso observado", "#6C303A"),
+        ("02", "HIPÓTESIS", "Una recomendación\npuede interesar", "#B58B45"),
+        ("03", "COMPARAR", "Grupo con sugerencia\nvs. grupo similar", "#28564A"),
+        ("04", "MEDIR", "Conversión · ingreso\npor cliente · margen", "#6C303A"),
+    ]
+    x_positions = [45, 390, 735, 1080]
+    for i, (num, label, body, color) in enumerate(steps):
+        x = x_positions[i]
+        d.rounded_rectangle((x, 210, x + 275, 610), radius=25, fill="#24483F", outline="#47695D", width=2)
+        d.rounded_rectangle((x, 210, x + 275, 285), radius=25, fill=color)
+        d.rectangle((x, 255, x + 275, 285), fill=color)
+        d.text((x + 22, 232), num, font=font(24, True), fill="white")
+        d.text((x + 76, 235), label, font=font(20, True), fill="white")
+        d.multiline_text((x + 28, 350), body, font=font(22, True), fill="white", spacing=18, align="center")
+        if i < 3:
+            d.line((x + 281, 410, x + 331, 410), fill="#D7B879", width=9)
+            d.polygon([(x + 331, 410), (x + 305, 390), (x + 305, 430)], fill="#D7B879")
+    d.text((100, 700), "Propuesta futura; este proyecto no ejecutó una campaña ni midió causalidad.", font=font(22, True), fill="#D7B879")
+    im.save(ASSETS / "diagrama_prueba_comercial.png", optimize=True)
+
+
 def make_sqlserver_evidence_crop():
     """Crop the actual Terminal capture for legibility; retain the full capture in docs/."""
     source = ROOT / "docs" / "captura-sqlserver-demo-2026-11-23.png"
@@ -162,6 +275,10 @@ def note(slide, minutes, script, cue):
 
 
 make_medallion_asset()
+make_sources_diagram()
+make_row_journey_diagram()
+make_quality_diagram()
+make_experiment_diagram()
 make_sqlserver_evidence_crop()
 prs = Presentation()
 prs.slide_width, prs.slide_height = Inches(W), Inches(H)
@@ -228,26 +345,14 @@ add_text(s, 0.86, 5.93, 11.5, 0.58, "Base: 5 ventas. Para mostrar limpieza agreg
 footer(s, 3, total)
 note(s, 1.5, "La pregunta analítica es sencilla: al conectar ventas, clientes y ratings podemos saber qué vino se vendió, por qué canal y a qué segmento. La base de demostración parte de cinco transacciones, cuatro clientes y tres vinos. Por indicación del profesor agregamos dos filas POS y un rating sintéticos para que se vea la limpieza. No recibimos los archivos originales ni datos de inventario o de venta web. Por eso hablamos de la muestra y no de todo el negocio.", "Primero definir la pregunta; después marcar con honestidad qué datos sí la pueden responder.")
 
-# 4 · Qué aporta cada fuente y con qué llave se conecta.
-s = new_slide(prs, GREEN)
-heading(s, "01 · Las fuentes", "Cada fuente aporta una parte de la respuesta", "No juntamos tablas por intuición: usamos las llaves que comparten.", dark=True)
-source_rows = [
-    ("POS", "Qué se vendió", "ID_Venta_POS · SKU_Vino · ID_Cliente · canal · cantidad · precio", "5 ventas base", BURGUNDY),
-    ("CRM", "Quién compra", "ID_Cliente · membresía · ciudad · gasto reportado", "4 clientes", GOLD),
-    ("Ratings", "Qué vino es", "SKU_Vino · etiqueta · puntaje · origen", "3 vinos base", GREEN2),
-]
-for i, (tag, question, fields, count, tone) in enumerate(source_rows):
-    y = 1.95 + i * 1.18
-    add_rect(s, 0.78, y, 11.75, 0.95, "24483F", line="47695D")
-    add_rect(s, 0.78, y, 1.25, 0.95, tone, radius=False)
-    add_text(s, 0.91, y + 0.3, 1.0, 0.3, tag, 12, WHITE, True, align=PP_ALIGN.CENTER)
-    add_text(s, 2.3, y + 0.13, 2.0, 0.27, question, 14, WHITE, True, face="Georgia")
-    add_text(s, 4.35, y + 0.12, 6.1, 0.54, fields, 10, "E7E0D5")
-    add_text(s, 10.55, y + 0.3, 1.72, 0.27, count, 10, "D7B879", True, align=PP_ALIGN.RIGHT)
-add_text(s, 1.0, 5.83, 11.2, 0.58, "POS.ID_Cliente → CRM.ID_Cliente     ·     POS.SKU_Vino → Ratings.SKU_Vino", 14, WHITE, True, align=PP_ALIGN.CENTER)
-add_text(s, 1.0, 6.48, 11.2, 0.28, "Para la demostración se agregan filas sintéticas sucias; se identifican como ejemplos, no como transacciones reales.", 10, "D7B879", True, align=PP_ALIGN.CENTER)
+# 4 · Diagrama raster de fuentes y llaves compartidas.
+s = new_slide(prs)
+heading(s, "01 · Las fuentes", "Tres fuentes se conectan por dos llaves", "El dibujo separa los campos de origen del resultado integrado.")
+add_photo(s, "diagrama_fuentes_integracion.png", 0.62, 1.82, 7.75, 4.84)
+add_photo(s, "fuentes-vinicola-conceptual.png", 8.55, 1.82, 4.18, 4.84, focus=(0.5, 0.5))
+add_text(s, 8.72, 6.69, 3.85, 0.2, "Imagen conceptual · POS, cliente y vino", 8, MUTED, italic=True)
 footer(s, 4, total)
-note(s, 1.5, "Cada fuente contesta algo distinto. POS dice qué se vendió, cuánto y por qué canal; CRM aporta atributos del cliente; ratings describe el vino. ID_Cliente conecta POS con CRM y SKU_Vino conecta POS con los datos del vino. El SQL trae una muestra base pequeña. Para poder enseñar una corrida realista, el profesor permite incluir datos falsos de prueba: agregamos una duplicidad corregible y errores intencionales, siempre identificados como sintéticos.", "La llave compartida explica por qué estas fuentes sí se pueden integrar.")
+note(s, 1.5, "POS dice qué se vendió; CRM, quién compró; y Ratings, qué vino fue. Para juntar las tablas no usamos una coincidencia de nombres: se conecta por ID_Cliente y SKU_Vino. La fotografía es solo una ilustración de esos tipos de fuente; los datos reales usados en la ejecución son los que aparecen en la captura y el log. El profesor permite datos falsos para el recorrido; las filas sintéticas están señaladas como ejemplos.", "Dos llaves explican la integración; la fotografía solo la hace más tangible.")
 
 # 4 · Arquitectura Medallion con el asset requerido y corregido.
 s = new_slide(prs)
@@ -256,30 +361,15 @@ add_photo(s, "flujo_medallon_sql.png", 1.5, 1.72, 10.35, 5.18)
 footer(s, 5, total)
 note(s, 1.75, "Bronce es la zona de llegada: guarda la fila para poder ver qué entró, incluso si está sucia. Plata aplica reglas de limpieza y crea las dimensiones de clientes y vinos que van a dar contexto a cada venta. Oro publica el hecho de ventas ya relacionado y las vistas que usarían operación o BI. Las capas separan conservar, transformar y consumir; así podemos revisar la regla sin perder el registro original.", "Bronce permite preguntar qué llegó; Plata, qué corregimos; Oro, qué podemos consultar.")
 
-# 6 · Cómo una fila recorre las capas.
+# 6 · Diagrama de recorrido por capas como imagen raster.
 s = new_slide(prs)
-heading(s, "02 · Recorrido de una fila", "La misma venta cambia de estado en cada capa", "Ejemplo: POS-805 llega con espacios y dos versiones.")
-stages = [
-    ("1 · LLEGADA", "' POS-805 '", "Bronce", "Conservar tal como se recibió", BURGUNDY),
-    ("2 · REGLA", "TRIM + ROW_NUMBER", "Plata", "Normalizar ID y escoger fecha más reciente", GOLD),
-    ("3 · RESPUESTA", "POS-805 · 19:30", "Oro", "Publicar una sola venta válida", GREEN2),
-]
-for i, (label, value, layer, detail, tone) in enumerate(stages):
-    x = 0.62 + i * 4.22
-    add_rect(s, x, 2.2, 3.75, 2.45, PAPER, line="E7DFD2")
-    add_rect(s, x, 2.2, 3.75, 0.48, tone, radius=False)
-    add_text(s, x + 0.17, 2.31, 3.4, 0.23, label, 10, WHITE, True)
-    add_text(s, x + 0.2, 2.98, 3.3, 0.49, value, 18, GREEN, True, face="Georgia", align=PP_ALIGN.CENTER)
-    add_text(s, x + 0.2, 3.64, 3.3, 0.25, layer, 11, BURGUNDY, True, align=PP_ALIGN.CENTER)
-    add_text(s, x + 0.2, 4.02, 3.3, 0.43, detail, 10, MUTED, align=PP_ALIGN.CENTER)
-    if i < 2:
-        add_text(s, x + 3.78, 3.16, 0.38, 0.35, "→", 22, GOLD, True, align=PP_ALIGN.CENTER)
-add_rect(s, 0.85, 5.4, 11.65, 0.85, PALE_GOLD)
-add_text(s, 1.1, 5.62, 11.1, 0.38, "La fila anterior sigue en Bronce para poder explicar por qué se eligió la versión de las 19:30.", 12, INK, True, align=PP_ALIGN.CENTER)
+heading(s, "02 · Recorrido de una fila", "POS-805 pasa de dos versiones a una venta", "El ejemplo enseña qué conserva cada capa y por qué gana 19:30.")
+add_photo(s, "diagrama_recorrido_pos805.png", 0.62, 1.82, 12.08, 4.45)
+add_text(s, 0.9, 6.48, 11.5, 0.34, "Bronce conserva ambas filas · Plata aplica TRIM y ROW_NUMBER · Oro publica una versión", 11, GREEN, True, align=PP_ALIGN.CENTER)
 footer(s, 6, total)
 note(s, 1.5, "Veamos una venta concreta en lugar de describir la arquitectura en abstracto. POS-805 llega con espacios y dos versiones. Bronce conserva ambas. En Plata TRIM quita los espacios y ROW_NUMBER ordena las versiones por fecha; gana la de las 19:30. Oro recibe una única venta relacionada con cliente y vino. La fila descartada no desaparece de la zona de llegada: podemos explicar la decisión y conservar trazabilidad.", "Las capas son etapas de una misma fila, no tres copias para leer por separado.")
 
-# 5 · DER oficial, legible y con las llaves destacadas.
+# 7 · Modelo relacional con la imagen DER existente.
 s = new_slide(prs)
 heading(s, "03 · Modelo relacional", "Una venta se conecta con un cliente y un vino", "Las llaves primarias identifican; las foráneas protegen las relaciones en Oro.")
 add_photo(s, "diagrama_der_sqlserver.png", 1.22, 1.9, 10.89, 5.1)
@@ -342,25 +432,12 @@ add_text(s, 5.2, 5.72, 7.18, 0.4, "Rerun: 5 ventas · 24 botellas · $22,760; el
 footer(s, 10, total)
 note(s, 1.25, "La muestra original tiene cinco ventas. Las dos filas adicionales son datos falsos de prueba para el recorrido, tal como permite el profesor: una versión duplicada de POS-805 y POS-806 con cantidad inválida. El rating 120 también es sintético. Tras limpiar, Oro mantiene cinco ventas. Volvimos a correr el proceso y el total se mantuvo en cinco, 24 botellas y $22,760. Eso comprueba idempotencia: repetir el ETL no duplica el resultado final.", "Datos de prueba declarados; reejecución con el mismo resultado.")
 
-# 9 · Calidad con números legibles.
+# 11 · Diagrama raster de controles cuantitativos.
 s = new_slide(prs)
-heading(s, "06 · Calidad y control", "La vista responde si el flujo fue limpio", "La salida de oro.vw_Calidad_Integracion, en cuatro lecturas.")
-quality = [
-    ("POS", "7 Bronce · 6 IDs · 1 duplicado · 1 inválida", "5 ventas Oro · 24 botellas · $22,760 MXN", BURGUNDY),
-    ("Ratings", "4 en Bronce · 1 fuera de escala", "3 vinos válidos en Plata · rango permitido: 0–100", GREEN),
-    ("CRM", "4 clientes · 1 gasto faltante", "$4,920 proxy marcado · no es gasto anual confirmado", GOLD),
-    ("Relaciones", "0 clientes huérfanos · 0 vinos huérfanos", "1 venta anónima preservada como CLI-MOSTRADOR", GREEN2),
-]
-for i, (label, main, detail, tone) in enumerate(quality):
-    y = 2.0 + i * 1.02
-    add_rect(s, 0.75, y, 11.85, 0.82, PAPER, line="E7DFD2")
-    add_rect(s, 0.75, y, 1.55, 0.82, tone, radius=False)
-    add_text(s, 0.88, y + 0.22, 1.29, 0.32, label, 12, WHITE, True, align=PP_ALIGN.CENTER)
-    add_text(s, 2.55, y + 0.13, 9.7, 0.27, main, 13, INK, True)
-    add_text(s, 2.55, y + 0.48, 9.7, 0.22, detail, 10, MUTED)
-add_text(s, 0.8, 6.36, 11.8, 0.35, "Conteos comprobados en SQL Server; aplican a la muestra, no a fuentes completas del negocio.", 11, INK, True)
+heading(s, "06 · Calidad y control", "Dos controles explican el resultado", "El diagrama resume los conteos reales de la corrida.")
+add_photo(s, "diagrama_controles_calidad.png", 0.62, 1.85, 12.08, 4.72)
 footer(s, 11, total)
-note(s, 1.75, "Ximena lee cuatro resultados de la vista de calidad. En POS hubo siete filas de entrada, seis IDs, una versión anterior descartada y una cantidad inválida; quedan cinco ventas válidas. Ratings tiene cuatro filas y un puntaje fuera de rango; tres vinos válidos llegan a Plata. CRM tiene cuatro clientes y un gasto imputado como proxy, señalado para no tratarlo como dato confirmado. No hay clientes ni vinos huérfanos y la venta sin identidad se conserva como CLI-MOSTRADOR. Todos son conteos de esta muestra.", "Una vista de calidad permite ver entradas, rechazos y resultados en un mismo lugar.")
+note(s, 1.75, "Ximena explica dos recorridos. En POS partimos de siete filas: hay seis IDs, una versión anterior descartada y una cantidad inválida; quedan cinco ventas válidas. Ratings tiene cuatro filas y un puntaje fuera de rango; tres registros válidos pasan la regla de 0 a 100. Abajo aparecen los controles de CRM y relaciones: cuatro clientes, un proxy marcado, ningún huérfano y una venta anónima conservada. Todos son conteos de esta muestra.", "La imagen cuenta qué entra, qué se rechaza y qué queda listo para consultar.")
 
 # 12 · Vistas: qué pregunta contesta cada una.
 s = new_slide(prs)
@@ -402,26 +479,14 @@ add_text(s, 5.85, 6.51, 6.5, 0.25, "Idea: probar recomendación y medir conversi
 footer(s, 13, total)
 note(s, 1.75, "Las cinco ventas suman $22,760. Rioja aporta $14,400, que representan 63.27 por ciento del ingreso observado. Los vinos con puntaje mayor a 93 también suman $14,400, pero las doce botellas corresponden a una sola persona. Es una señal descriptiva de la muestra, no evidencia de que el puntaje causó la compra. Ezequiel presenta la implicación comercial en la siguiente lámina.", "Primero describir el número; luego decir qué no prueba.")
 
-# 14 · De la señal a una prueba comercial concreta.
-s = new_slide(prs, GREEN)
-heading(s, "07 · De dato a decisión", "Una señal sirve si se convierte en una prueba", "La muestra inspira una hipótesis; una prueba más amplia ayuda a evaluarla.", dark=True)
-experiment = [
-    ("SEÑAL", "Rioja aporta 63.27% del ingreso observado.", BURGUNDY),
-    ("HIPÓTESIS", "Una recomendación por origen o puntaje puede interesar a más clientes.", GOLD),
-    ("PRUEBA", "Mostrar la recomendación a un grupo y compararlo con otro similar.", GREEN2),
-    ("MEDIDA", "Comparar conversión, ingreso por cliente y margen; revisar por segmento.", BURGUNDY),
-]
-for i, (label, body, tone) in enumerate(experiment):
-    x = 0.7 + i * 3.18
-    add_rect(s, x, 2.35, 2.85, 2.45, "24483F", line="47695D")
-    add_rect(s, x, 2.35, 2.85, 0.47, tone, radius=False)
-    add_text(s, x + 0.17, 2.46, 2.5, 0.22, label, 10, WHITE, True, align=PP_ALIGN.CENTER)
-    add_text(s, x + 0.2, 3.02, 2.45, 1.34, body, 12, WHITE, True, valign=MSO_ANCHOR.MIDDLE, align=PP_ALIGN.CENTER)
-    if i < 3:
-        add_text(s, x + 2.86, 3.3, 0.3, 0.45, "→", 20, "D7B879", True, align=PP_ALIGN.CENTER)
-add_text(s, 1.0, 5.54, 11.0, 0.55, "Esto es una propuesta para medir; el proyecto no ejecutó una campaña ni estimó causalidad.", 12, "D7B879", True, align=PP_ALIGN.CENTER)
+# 14 · Imagen editorial + diagrama de una prueba medible.
+s = new_slide(prs)
+heading(s, "07 · De dato a decisión", "Una señal se convierte en una prueba", "La comparación está propuesta; todavía no se ha ejecutado.")
+add_photo(s, "prueba-recomendacion-conceptual.png", 0.62, 1.85, 5.12, 4.35, focus=(0.5, 0.5))
+add_photo(s, "diagrama_prueba_comercial.png", 5.95, 1.85, 6.76, 4.35)
+add_text(s, 0.82, 6.32, 4.75, 0.2, "Imagen conceptual · grupos de comparación", 8, MUTED, italic=True)
 footer(s, 14, total)
-note(s, 1.25, "Ezequiel traduce la lectura a un siguiente paso concreto. La señal es que Rioja representa buena parte del ingreso de esta pequeña muestra. La hipótesis es que una recomendación por origen o puntaje podría interesar a más clientes. Para ponerla a prueba, podríamos comparar un grupo que recibe la recomendación con uno que no, y medir conversión, ingreso por cliente y margen. Es una propuesta futura, no un experimento que ya hayamos corrido.", "Separar dato observado, hipótesis y prueba evita vender una correlación como causa.")
+note(s, 1.25, "Ezequiel traduce la lectura a un siguiente paso concreto. La señal es que Rioja representa buena parte del ingreso de esta pequeña muestra. La hipótesis es que una recomendación por origen o puntaje podría interesar a más clientes. Para ponerla a prueba, podríamos comparar un grupo que recibe la recomendación con uno que no y medir conversión, ingreso por cliente y margen. La foto y el diagrama son ilustrativos: esta prueba aún no se ejecutó.", "Separar dato observado, hipótesis y prueba evita vender una correlación como causa.")
 
 # 11 · Límites y trabajo no implementado.
 s = new_slide(prs)
