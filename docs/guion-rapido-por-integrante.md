@@ -1,73 +1,34 @@
-# Guion rápido por integrante — Equipo 2
+# Reparto rápido — exposición de 25 minutos
 
-**Meta de tiempo: 25 min.** 15 min de exposición y demo + 8 min de preguntas + 2 min de transiciones. Moodle pide dos preguntas por persona; el banco oficial trae tres. Estas son las dos prioritarias. La respuesta completa y una tercera pregunta de respaldo están en [`respuestas-banco-preguntas-por-rol.md`](respuestas-banco-preguntas-por-rol.md).
+Las preguntas comienzan **después** de los 25 minutos. Las respuestas del banco oficial están aparte en [`respuestas-banco-preguntas-por-rol.md`](respuestas-banco-preguntas-por-rol.md); no se proyectan como contenido de la exposición.
 
-## Reparto al presentar
-
-| Persona | Diapositivas | Tiempo hablado | Idea que debe quedar |
+| Integrante | Diapositivas | Tiempo | Parte |
 |---|---:|---:|---|
-| Ezequiel | 1–3, apoya 10, 13 | 3:45 | Alcance y decisión de negocio, con sus límites. |
-| José | 4–5 | 2:30 | Qué hace cada capa y cómo se conectan las llaves. |
-| Patricio | 6–8 | 4:45 | Corrida en vivo, limpieza e idempotencia. |
-| Ximena | 9, 11 | 2:00 | Calidad medida y lo que la muestra no demuestra. |
-| Joel | apoya 10, 12 | 2:00 | Cómo leer la Vista Oro y dónde están los entregables. |
-| **Total** |  | **15:00** | Preguntas: 8 min · transiciones: 2 min. |
+| Ezequiel Aguilera | 1–3, parte de 13, 14, 18 | 5:15 | Objetivo, alcance, lectura comercial, prueba propuesta y cierre. |
+| Joel Ibarra | 4, 12, parte de 13, 17 | 4:45 | Fuentes y llaves, vistas, lectura de indicadores y repositorio. |
+| José Hernández | 5–7 | 4:45 | Capas Bronce/Plata/Oro, recorrido de una fila, modelo relacional. |
+| Patricio García | 8–10 | 6:00 | Corrida desde cero, limpieza e idempotencia. |
+| Ximena Ibarra | 11, 15–16 | 4:15 | Controles, límites y mejoras priorizadas. |
+| **Total** | **18 diapositivas** | **25:00** | Preguntas al terminar. |
 
-El banco oficial conserva a Ezequiel como Líder + BI y a Joel como Documentación/Trello. Para atender la guía que divide Liderazgo y BI en equipos de cinco, Joel lee los KPI de la vista; Ezequiel propone la decisión comercial y responde la pregunta oficial de BI.
+## Mensaje listo para enviar al grupo
 
-## Qué decir
+> Equipo, actualicé la presentación para que la **exposición dure 25 minutos completos**; la ronda de preguntas va después y sus respuestas no están en las diapositivas. Este es el reparto:
+>
+> • **Ezequiel:** diapositivas 1–3, parte de la 13, 14 y 18. Presenta el objetivo y el alcance; cierra la lectura de negocio, propone cómo medir la hipótesis y da el cierre. Tiempo: **5:15**.
+> • **Joel:** diapositivas 4, 12, parte de la 13 y 17. Explica qué aporta cada fuente y sus llaves, para qué sirven las vistas, lee los indicadores y ubica los entregables. Tiempo: **4:45**.
+> • **José:** diapositivas 5–7. Explica Bronce, Plata y Oro, sigue el ejemplo de POS-805 por las capas y presenta el modelo y las llaves. Tiempo: **4:45**.
+> • **Patricio:** diapositivas 8–10. Hace el recorrido de la corrida SQL, explica las reglas de limpieza y demuestra que reprocesar no duplica las ventas. Tiempo: **6:00**.
+> • **Ximena:** diapositivas 11 y 15–16. Explica los controles, los límites de la muestra y qué mejoras seguirían. Tiempo: **4:15**.
+>
+> El profesor permite usar datos falsos para el recorrido: los ejemplos sintéticos están identificados como datos de prueba, no como ventas reales. La corrida comprobada dio 7 filas POS → 6 IDs → 5 ventas Oro, con 24 botellas y $22,760. Ensayemos con cronómetro para mantener los 25 minutos y dejemos las preguntas para el final. Cada quien revise por separado sus dos preguntas prioritarias del banco.
 
-### Ezequiel — apertura y cierre
+## Ideas clave para recordar
 
-> “Integramos ventas POS, clientes del CRM y calificaciones de vinos en SQL Server. La base tiene cinco ventas válidas y tres filas sintéticas sucias para explicar la limpieza. Viñedos del Alba es ficticio; faltan archivos fuente, inventario y datos web.”
+- **Ezequiel:** la muestra inspira una prueba comercial; no prueba causalidad.
+- **Joel:** `ID_Cliente` y `SKU_Vino` explican cómo se integran las fuentes.
+- **José:** Bronce conserva, Plata transforma, Oro responde.
+- **Patricio:** `TRIM` limpia, `ROW_NUMBER` elige la última versión y `TRY_CONVERT` excluye valores no convertibles.
+- **Ximena:** la vista de calidad cuenta entradas, errores y salida válida.
 
-**Insight:** “Rioja aporta $14,400, 63.27% del ingreso. Doce de quince botellas Platinum superan 93 puntos, pero las compró una persona. Probaríamos una recomendación y mediríamos conversión con más clientes.”
-
-### José — arquitectura y modelo
-
-> “Bronce guarda lo recibido; Plata limpia y conecta clientes y vinos; Oro publica ventas y vistas. La venta tiene una PK y dos FKs. Si no hay cliente, conserva la venta como CLI-MOSTRADOR.”
-
-### Patricio — ETL y demo
-
-> “TRIM limpia los espacios; ROW_NUMBER deja la versión POS-805 de las 19:30; TRY_CONVERT excluye POS-806 porque ‘muchas’ no es una cantidad. Reprocesar conservó cinco ventas en Oro.”
-
-**Demo (diapositiva 6):** mostrar la captura real de `sqlcmd` con SQL Server 2022, los conteos `7 → 6 → 5`, la versión 19:30 de POS-805 y el total de Oro. La base vacía y los cuatro archivos ya se ejecutaron mediante `./tasks/run-sqlserver-demo.sh`; la captura y el log están en `docs/`. No presentarlo como SSMS.
-
-### Ximena — QA y límites
-
-> “La vista cuenta siete filas POS, seis IDs, un duplicado, una cantidad inválida y cinco ventas Oro. En ratings hay uno fuera de rango y tres válidos; no hay huérfanos y se conserva una venta anónima.”
-
-### Joel — lectura de Oro y entregables
-
-> “La Vista Gold reúne cliente, vino, canal, botellas e importe; las vistas KPI resumen membresía, origen y calidad. En el repo están los cuatro scripts, assets, presentación, Q&A y Plan B. El Trello es privado y Customer 360 queda fuera de este modelo.”
-
-## Dos preguntas prioritarias por integrante
-
-### Patricio García — ETL
-
-1. **¿Por qué conservar POS-804?** Es una venta válida aunque no se conoce al cliente; se asigna CLI-MOSTRADOR y se conservan los $450 sin inventar identidad.
-2. **¿Cómo evita duplicados al reejecutar?** La ingesta no repite la misma fila; `ROW_NUMBER()` elige por ID y fecha; Oro actualiza o inserta por llave. La muestra sintética parte de siete filas, pero conserva cinco ventas y no cambia los totales al reprocesar.
-
-### José Hernández — Arquitectura
-
-1. **¿Qué aporta Medallón?** Bronce permite rastrear la entrada, Plata limpia y valida, y Oro sirve hechos y vistas listos para analizar.
-2. **¿Qué pasa con un SKU desconocido?** Plata no lo integra como dimensión válida y la FK bloquea una relación inexistente en Oro. La fila queda en Bronce; todavía falta una tabla que registre el motivo del rechazo.
-
-### Ximena Ibarra — QA
-
-1. **¿Qué anomalías revisan?** Nulos, duplicados, conversiones, cantidades/precios fuera de rango, huérfanos, categorías y ratings inválidos. La demo detecta un duplicado, una cantidad no convertible, un rating fuera de escala y cero huérfanos.
-2. **¿Qué hacen con un rating nulo o fuera de rango?** Se conserva en Bronce, se excluye de Plata/Oro y se cuenta como inválido. La escala válida es 0–100; el ejemplo 120 comprueba esta regla.
-
-### Joel Ibarra — Documentación y Trello
-
-1. **¿Qué falta para cerrar diccionario y Trello?** Trello tiene el avance y las tareas de defensa. El diccionario de Customer 360 necesita las definiciones oficiales de Tickets, Interacciones y Ventas; ese esquema no está en este SQL.
-2. **¿Cómo alinean SQL, presentación y Trello?** La rama de entrega da la versión de referencia; se anotan responsables/evidencias en Trello y la presentación usa solo resultados reproducidos desde SQL.
-
-### Ezequiel Aguilera — Liderazgo y BI
-
-1. **¿Qué decisión sugieren los KPI?** Probar una recomendación Rioja o >93 puntos y medir conversión e ingreso incremental con más clientes; cinco ventas no prueban causalidad.
-2. **¿Qué limita no tener inventario ni venta web?** No se puede calcular reabasto, agotamiento ni conversión en línea. El análisis describe únicamente la muestra POS.
-
-## Si se bloquea la demo
-
-Usar el resultado local de `plan-b-resultados.md` y `evidencia-ejecucion-sqlserver-2026-11-23.txt`. El log es salida real de SQL Server por `sqlcmd`, no captura de SSMS. No inventar que la pantalla se ejecutó en vivo.
+La corrida, captura y salida están en `plan-b-resultados.md`, `captura-sqlserver-demo-2026-11-23.png` y `evidencia-ejecucion-sqlserver-2026-11-23.txt`.

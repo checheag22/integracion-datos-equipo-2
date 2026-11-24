@@ -1,86 +1,78 @@
-# Guion de exposición y demo — Equipo 2
+# Guion de exposición — Equipo 2
 
-## Duración acordada: 25 minutos
+**Duración de exposición y demo: 25 minutos.** La ronda de preguntas va después y no forma parte de estos 25 minutos. Las respuestas del banco oficial están en un archivo aparte; no aparecen en las diapositivas.
 
-Moodle pide una exposición de 25–35 minutos. La guía PDF adjunta marca 20–25 minutos en total, con 12–15 minutos de exposición/demo y 6–8 de preguntas. El guion usa el extremo común: **15 minutos de exposición y demo + 8 minutos de preguntas + 2 minutos para transiciones = 25 minutos**. En Moodle se indica que cada integrante debe preparar dos preguntas; el banco oficial trae tres por rol, así que estudien las dos prioritarias y lean la tercera como respaldo.
+## Orden y tiempo
 
-## Orden, quién habla y qué explicar
-
-| Diapositiva | Persona | Tiempo | Explicación en una frase |
+| Diapositiva | Quién | Tiempo | Qué debe quedar claro |
 |---|---|---:|---|
-| 1 | Ezequiel | 0:30 | Presentar el objetivo y el caso ficticio. |
-| 2 | Ezequiel | 0:45 | Presentar las responsabilidades de los cinco integrantes. |
-| 3 | Ezequiel | 1:00 | Explicar las fuentes disponibles y los límites de la muestra. |
-| 4 | José | 1:15 | Recorrer Bronce → Plata → Oro en el flujo real. |
-| 5 | José | 1:15 | Mostrar PK, FK y tipos del modelo relacional. |
-| 6 | Patricio | 2:30 | Correr ingesta, transformación y consulta Oro en vivo. |
-| 7 | Patricio | 1:15 | Explicar tres reglas de limpieza con ejemplos. |
-| 8 | Patricio | 1:00 | Contar cómo se evita duplicar y qué probó SQL Server. |
-| 9 | Ximena | 1:30 | Leer la calidad en conteos concretos. |
-| 10 | Joel + Ezequiel | 2:00 | Joel lee Oro; Ezequiel interpreta la decisión comercial. |
-| 11 | Ximena | 0:30 | Declarar con claridad qué no puede concluirse. |
-| 12 | Joel | 1:00 | Ubicar los entregables y pendientes en GitHub Desktop/Trello. |
-| 13 | Ezequiel | 0:30 | Cerrar con el siguiente paso medible e invitar preguntas. |
-| **Exposición + demo** |  | **15:00** |  |
-| **Preguntas** | Todos | **8:00** | Dos respuestas por integrante, alrededor de 48 segundos cada una. |
-| **Transiciones y preparación de pantalla** | Todos | **2:00** | Cambios de expositor/ventana y margen técnico. |
-| **Total** |  | **25:00** |  |
+| 1–3 | Ezequiel | 2:45 | Objetivo, equipo y alcance de la muestra. |
+| 4 | Joel | 1:30 | Qué aporta cada fuente y cómo se relaciona. |
+| 5–7 | José | 4:45 | Para qué sirve cada capa, cómo viaja una fila y cómo se relacionan las tablas. |
+| 8–10 | Patricio | 6:00 | Ejecución real, reglas de limpieza e idempotencia. |
+| 11 | Ximena | 1:45 | Qué muestran los controles de calidad. |
+| 12 | Joel | 1:30 | Qué preguntas responden las cinco vistas. |
+| 13 | Joel + Ezequiel | 1:45 | Joel lee los indicadores; Ezequiel explica el alcance del insight. |
+| 14 | Ezequiel | 1:15 | Cómo convertir una señal en una prueba medible. |
+| 15–16 | Ximena | 2:30 | Límites y mejoras priorizadas. |
+| 17 | Joel | 0:45 | Dónde encontrar el código y la evidencia. |
+| 18 | Ezequiel | 0:30 | Cierre y paso a preguntas. |
+| **Total** |  | **25:00** | Las preguntas se contestan al terminar. |
 
-La asignación de roles y nombres sigue el banco oficial. Para cinco integrantes, la guía también pide dividir Liderazgo y BI: Joel muestra la lectura de la vista como parte del bloque documental y Ezequiel la traduce a decisión. Ezequiel conserva la respuesta comercial oficial del banco.
+## Guion fácil de explicar
 
-## Guion fácil de decir
+### Diapositivas 1–3 · Ezequiel
 
-### 1–3 · Ezequiel — propósito, roles y alcance
+> “Integramos ventas POS, clientes CRM y calificaciones de vinos para contestar qué se vendió, por qué canal y a qué tipo de cliente. Viñedos del Alba es un caso ficticio. La muestra base tiene cinco ventas, cuatro clientes y tres vinos. No recibimos inventario ni ventas web.”
 
-> “Somos el Equipo 2. Conectamos ventas POS, clientes del CRM y calificaciones de vinos en SQL Server para saber qué se vendió, por qué canal y con qué perfil. Viñedos del Alba es un nombre ficticio. La base de muestra tiene cinco ventas, cuatro clientes y tres vinos; agregamos tres filas sintéticas para demostrar cómo se limpian datos sucios. No recibimos archivos fuente, inventario ni ventas web.”
+Aclarar que las filas extra de la corrida son datos sintéticos de prueba autorizados por el profesor. Sirven para demostrar reglas y no se reportan como ventas reales.
 
-En la diapositiva 2, indicar en una frase quién lleva Arquitectura, ETL, QA, Liderazgo/BI y Documentación/Trello. Los nombres y roles coinciden con el banco oficial.
+### Diapositiva 4 · Joel
 
-### 4–5 · José — arquitectura y modelo
+> “POS aporta el detalle de la venta; CRM, los atributos del cliente; y ratings, el contexto del vino. `ID_Cliente` conecta POS con CRM y `SKU_Vino` conecta POS con el catálogo de vinos.”
 
-> “Bronce conserva los valores como llegaron; Plata limpia, escoge versiones y conecta cliente con vino; Oro publica las cinco ventas válidas y sus vistas. La llave primaria identifica la venta y dos llaves foráneas conectan Cliente y Vino. Si falta cliente, se conserva como CLI-MOSTRADOR.”
+Explicar que las llaves hacen verificable el cruce. Los datos falsos se usan solo en ejemplos sucios de la corrida.
 
-### 7–8 · Patricio — limpieza e idempotencia
+### Diapositivas 5–7 · José
 
-> “En POS-805, TRIM quita los espacios y ROW_NUMBER elige la versión más reciente. En POS-806, TRY_CONVERT no puede convertir ‘muchas’ y la fila queda fuera de Oro. El puntaje 120 también queda fuera del rango. Repetir el proceso conserva cinco ventas en Oro.”
+> “Bronce conserva lo que llegó; Plata aplica las reglas y prepara las dimensiones; Oro publica las ventas relacionadas y las vistas. En el ejemplo, Bronce mantiene las dos versiones de POS-805, Plata limpia los espacios y elige la de las 19:30, y Oro deja una venta. El modelo relaciona cada venta con cliente y vino mediante llaves foráneas.”
 
-### 9 · Ximena — calidad
+Mencionar una venta sin cliente: se conserva bajo `CLI-MOSTRADOR` para no perder el importe ni inventar una identidad.
 
-> “La vista marca siete filas POS en Bronce, seis IDs, un duplicado, un dato inválido y cinco ventas Oro. Ratings: cuatro recibidos, uno fuera de rango, tres válidos. No hay huérfanos; una venta anónima se conserva. Son cifras de la muestra.”
+### Diapositivas 8–10 · Patricio
 
-### 10 · Joel + Ezequiel — lectura de Oro
+> “La corrida parte de una base vacía en SQL Server 2022 y ejecuta los cuatro archivos en orden. La muestra tiene siete filas POS después de añadir datos de prueba: seis IDs únicos y cinco ventas válidas en Oro. POS-806 trae ‘muchas’ en la cantidad; no se convierte y queda fuera de Oro. Repetir el proceso conserva cinco ventas, 24 botellas y $22,760.”
 
-**Joel:** “La vista Oro muestra $22,760 en cinco ventas; Rioja aporta $14,400, 63.27% de los ingresos. En el segmento Platinum, 12 de 15 botellas superan 93 puntos.”
+En la evidencia señalar `7 → 6 → 5`, la versión de POS-805 a las 19:30, la exclusión de POS-806 y los totales. Es salida real de `sqlcmd` contra SQL Server 2022; no decir que es SSMS.
 
-**Ezequiel:** “Las doce botellas son de una sola persona. Proponemos probar una recomendación con más clientes y medir conversión; estos datos no demuestran causalidad.”
+### Diapositiva 11 · Ximena
 
-### 6 · Patricio — demostración real (2:30)
+> “La vista de calidad resume entradas y rechazos. También detecta el rating sintético 120 fuera del rango 0–100. No hay clientes ni vinos huérfanos; se conserva una venta anónima. Estos resultados describen la muestra de prueba.”
 
-La corrida ya fue ejecutada en SQL Server 2022 desde una base vacía con `sqlcmd` y un contenedor temporal. La diapositiva 6 contiene captura real; el log íntegro está en `docs/evidencia-ejecucion-sqlserver-2026-11-23.txt`. No es SSMS. Si el equipo decide mostrar una corrida en otra computadora, puede abrir los cuatro archivos en SSMS y seguir el mismo orden.
+### Diapositivas 12–13 · Joel y Ezequiel
 
-1. En Bronce, enseñar el duplicado ` POS-805 ` y la cantidad inválida `muchas`.
-2. En Plata, explicar que queda la versión de las 19:30 y se excluye POS-806.
-3. En la vista de calidad, leer `7 → 6 → 5` y `4 → 3` para POS y ratings.
-4. En Oro, mostrar 5 ventas, 24 botellas y $22,760; preguntar: “¿Qué compró CLI-V01 y qué puntaje tenía el vino?”
+**Joel:** explicar que `vw_POS_Operativa` y `vw_Gold_Ventas_Vinos` dan detalle integrado; las vistas KPI resumen membresía/canal y origen; `vw_Calidad_Integracion` explica el proceso.
 
-### 11 · Ximena — límites
+**Ezequiel:** “Observamos $22,760 en cinco ventas. Rioja aporta $14,400, 63.27% del ingreso. Las doce botellas con puntaje mayor a 93 también las compró una persona; es una señal pequeña, no prueba causalidad.”
 
-> “No podemos recomendar inventario ni evaluar e-commerce porque esas fuentes no están en el alcance. Customer 360 es un modelo separado y no está en este SQL. Tampoco generalizamos a partir de cinco ventas.”
+### Diapositiva 14 · Ezequiel
 
-### 12 · Joel — entrega
+> “La señal nos da una hipótesis, no una conclusión. Probaríamos una recomendación en un grupo y la compararíamos con otro; mediríamos conversión, ingreso por cliente y margen antes de decidir si funciona.”
 
-> “En `src` están los cuatro scripts en orden; en `assets`, el logo, el flujo, el DER y las imágenes; en `docs`, la presentación, las respuestas, el Plan B y la evidencia de ejecución. El tablero de Trello es privado. Antes de la entrega verificaremos el ensayo y cualquier requisito separado de Customer 360.”
+### Diapositivas 15–16 · Ximena
 
-### 13 · Ezequiel — cierre
+> “No recomendamos reabasto porque no tenemos inventario, ni generalizamos desde cinco ventas. Para mejorar, primero integraríamos fuentes reales con trazabilidad; después guardaríamos los rechazos con su motivo; ampliaríamos periodos y, cuando exista la fuente, agregaríamos inventario.”
 
-> “Integramos para preguntar mejor. El siguiente paso es ampliar la muestra y medir si la recomendación realmente cambia la conversión. Gracias; estamos listos para responder.”
+### Diapositivas 17–18 · Joel y Ezequiel
 
-## Plan B
+**Joel:** ubicar scripts, diagramas, presentación y evidencia en el repositorio.
 
-El PDF lleva la captura real de Terminal/`sqlcmd`, los conteos, el insight y las tres reglas de la demo. El log conserva resultados desde una base temporal limpia. Si preguntan, decir con claridad que fue SQL Server 2022 ejecutado con `sqlcmd`, no SSMS.
+**Ezequiel:** “Integramos fuentes para responder una pregunta con reglas claras. El siguiente paso es medir la hipótesis con más datos. Gracias; ahora pasamos a preguntas.”
 
-## Referencias rápidas
+## Verificación de SQL ya realizada
 
-- Banco oficial y respuestas razonadas: `docs/respuestas-banco-preguntas-por-rol.md`.
-- Salida reciente: `docs/plan-b-resultados.md` y `docs/evidencia-ejecucion-sqlserver-2026-11-23.txt`.
-- Scripts: `src/01_ddl_arquitectura_der.sql` → `src/02_etl_ingesta_bronce.sql` → `src/03_etl_limpieza_plata.sql` → `src/04_vistas_gold_bi.sql`.
+Se ejecutaron los cuatro archivos desde una base vacía y se repitieron. Se consultaron las cinco vistas y se ejecutaron los siete procedimientos; la transacción de prueba se revirtió. La salida completa está en `evidencia-ejecucion-sqlserver-2026-11-23.txt` y la captura en `captura-sqlserver-demo-2026-11-23.png`.
+
+## Preguntas
+
+El banco de respuestas se mantiene aparte en `respuestas-banco-preguntas-por-rol.md`. Las diapositivas terminan con una invitación a preguntas, sin incluir las respuestas.

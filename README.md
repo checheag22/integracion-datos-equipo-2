@@ -77,8 +77,8 @@ README.md
 3. `03_etl_limpieza_plata.sql`: siete procedimientos, conversiones, estandarización, deduplicación e integración idempotente.
 4. `04_vistas_gold_bi.sql`: cinco vistas Oro, KPIs y validaciones cuantitativas.
 
-El deck del avance previo se conserva en `docs/archivo-historico/`; la presentación final editable tiene 13 diapositivas, incluye la matriz de roles, notas del expositor y un plan de 25 minutos; su PDF está junto al PowerPoint. El guion por rol, las dos preguntas prioritarias por integrante y el Plan B están en `docs/demo-y-guion.md`, `docs/guion-rapido-por-integrante.md` y `docs/plan-b-resultados.md`.
-La guía de avance anterior también queda en `docs/archivo-historico/`; la guía que rige esta presentación está en `docs/guia-presentacion-proyecto-final.pdf`. Moodle pide 25–35 minutos; la guía PDF marca 20–25 minutos. El guion usa 15 minutos de exposición/demo, 8 de preguntas y 2 de transiciones (25 minutos en total).
+El deck del avance previo se conserva en `docs/archivo-historico/`; la presentación final editable tiene 18 diapositivas, notas del expositor y un guion de **25 minutos de exposición y demo**. Las preguntas se responden después; la presentación no muestra sus respuestas. El guion y el reparto por integrante están en `docs/demo-y-guion.md` y `docs/guion-rapido-por-integrante.md`; el banco de respuestas queda aparte.
+La guía que rige esta presentación está en `docs/guia-presentacion-proyecto-final.pdf`. Moodle pide 25–35 minutos; la guía PDF adjunta marca 20–25 minutos. Para cumplir el mínimo de Moodle sin mezclarlo con preguntas, esta versión programa 25 minutos de exposición; las preguntas se dejan para después.
 
 ### Ejecución
 

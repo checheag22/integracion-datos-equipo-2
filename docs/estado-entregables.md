@@ -11,7 +11,7 @@
 | Corrida demostrable | Verificada | SQL Server 2022 Developer desde base vacía: cuatro scripts en orden y segunda ejecución. Resultado: POS `7 → 6 → 5`, una versión duplicada descartada, una venta POS inválida excluida, rating `120` excluido; Oro conserva 5 ventas, 24 botellas y $22,760 MXN. |
 | Vistas y procedimientos | Verificados | Cinco vistas consultadas; siete procedimientos ejecutados. La inserción de prueba fue revertida y no dejó el cliente temporal. |
 | Evidencia visual y de salida | Incluida | `captura-sqlserver-demo-2026-11-23.png` y salida íntegra `.txt`. La captura es de `sqlcmd` conectado a SQL Server, no de SSMS. |
-| Exposición y defensa | Preparada | 13 diapositivas, guion de 25 minutos (15 de exposición/demo, 8 de preguntas, 2 de transiciones), dos preguntas prioritarias por integrante y respuestas de respaldo. |
+| Exposición y defensa | Preparada | 18 diapositivas y guion de 25 minutos de exposición/demo. Las preguntas van al terminar; sus respuestas están en un archivo aparte y no se proyectan en el deck. |
 | Envío en Moodle | Pendiente | La actividad 2139292 abre el 24 de noviembre de 2026 a las 11:00 y cierra el 26 a las 15:00. No se ha enviado ningún archivo. |
 
 ## Entregas de otras actividades que aparecen en el curso
